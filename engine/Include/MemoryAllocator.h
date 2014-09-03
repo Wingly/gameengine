@@ -2,7 +2,7 @@
 class MemoryAllocator
 {
 public:
-	MemoryAllocator(void);
-	~MemoryAllocator(void);
+	MemoryAllocator();
+	~MemoryAllocator();
 };
 

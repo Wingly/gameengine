@@ -3,9 +3,9 @@ class MemoryAllocator;
 class Application
 {
 public:
-	Application(void);
+	Application();
 	int Run();
-	~Application(void);
+	~Application();
 
 private:
 	void ThreadFunc(void* p_init);
