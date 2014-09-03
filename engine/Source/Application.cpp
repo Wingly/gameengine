@@ -17,13 +17,13 @@ void thread_func(void* init_value)
 	recursiveTest((int) init_value);
 }
 
-Application::Application(void)
+Application::Application()
 {
 
 }
 
 
-Application::~Application(void)
+Application::~Application()
 {
 	
 }

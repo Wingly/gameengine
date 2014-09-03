@@ -1,11 +1,11 @@
 #include <engine/Include/MemoryAllocator.h>
 
 
-MemoryAllocator::MemoryAllocator(void)
+MemoryAllocator::MemoryAllocator()
 {
 }
 
 
-MemoryAllocator::~MemoryAllocator(void)
+MemoryAllocator::~MemoryAllocator()
 {
 }
