@@ -36,7 +36,7 @@ Application::~Application()
 }
 
 
-int Run()
+int Application::Run()
 {
 	std::thread first(thread_func,(void*)0);
 	std::thread second(thread_func,(void*)1);
@@ -48,7 +48,7 @@ int Run()
 }
 
 
-void ThreadFunc(void* p_init)
+void Application::ThreadFunc(void* p_init)
 {
 
 }
