@@ -4,6 +4,13 @@
 #include <stdio.h>
 #include <thread>
 
+enum class StopCode
+{
+	CleanStop,
+	Restart,
+	CrashStop
+};
+
 void recursiveTest(int p_init)
 {
 		if(p_init < 7)
@@ -31,15 +38,13 @@ Application::~Application()
 
 int Run()
 {
-	
-
 	std::thread first(thread_func,(void*)0);
 	std::thread second(thread_func,(void*)1);
 
 	first.join();
 	second.join();
-	system("pause");
 
+	return (int)StopCode::CleanStop;
 }
 
 
