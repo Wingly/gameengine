@@ -3,6 +3,7 @@
 #include <thread>
 #include <stdio.h>
 #include <thread>
+#include <engine/Include/MemPool.h>
 
 enum class StopCode
 {
@@ -26,9 +27,17 @@ void thread_func(void* init_value)
 
 Application::Application()
 {
+	MemPool<float> a(5, sizeof(float));
+	float* b = a.getFreeBlock();
+	*b = 1.0f;
+
+	float* c = a.getFreeBlock();
+	*c = 2.0f;
+
+	float* d = a.getFreeBlock();
+	*d = 3.0f;
 
 }
-
 
 Application::~Application()
 {
