@@ -30,7 +30,7 @@ public:
 		m_sizeOfBlock = p_sizeOfBlock;
 
 		m_start = malloc(p_numBlocks * p_sizeOfBlock);
-		m_firstFree = m_block;
+		m_firstFree = m_start;
 		m_lastFilled = nullptr;
 
 		Block* local = (Block*)m_firstFree;
@@ -49,7 +49,7 @@ public:
 	T* getFreeBlock()
 	{
 		T* local = (T*)m_firstFree;
-
+/*
 		Block* newFirstFree	= dymamic_cast<Block*>(m_firstFree->m_next);		// Get next block that is supposed to be first.
 		Block* prev			= dymamic_cast<Block*>(local->m_prev);
 
@@ -66,7 +66,8 @@ public:
 		//
 		(Block*)local->m_prev = (Block*)m_lastFilled;
 		(Block*)local->m_next = (Block*)m_start;
-
+*/
 		return local;
+
 	}
 };

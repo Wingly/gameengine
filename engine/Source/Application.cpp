@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <thread>
 #include <engine/Include/MemPool.h>
+#include <engine/Include/Pool.h>
+#include <engine/Include/TestObject.h>
 
 enum class StopCode
 {
@@ -27,16 +29,9 @@ void thread_func(void* init_value)
 
 Application::Application()
 {
-	MemPool<float> a(5, sizeof(float));
-	float* b = a.getFreeBlock();
-	*b = 1.0f;
+	Pool* pool = new Pool();
 
-	float* c = a.getFreeBlock();
-	*c = 2.0f;
-
-	float* d = a.getFreeBlock();
-	*d = 3.0f;
-
+	TestObject* B = new(*pool) TestObject();
 }
 
 Application::~Application()
@@ -47,12 +42,6 @@ Application::~Application()
 
 int Application::Run()
 {
-	std::thread first(thread_func,(void*)0);
-	std::thread second(thread_func,(void*)1);
-
-	first.join();
-	second.join();
-
 	return (int)StopCode::CleanStop;
 }
 
