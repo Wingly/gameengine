@@ -12,19 +12,6 @@ enum class StopCode
 	CrashStop
 };
 
-void recursiveTest(int p_init)
-{
-		if(p_init < 7)
-			recursiveTest(++p_init);
-		else
-			printf("im DONE MATE %d", p_init);
-}
-
-void thread_func(void* init_value)
-{
-	recursiveTest((int) init_value);
-}
-
 Application::Application()
 {
 	MemPool<float> a(5);
@@ -37,6 +24,7 @@ Application::Application()
 	float* d = a.getFreeBlock();
 	*d = 3.0f;
 
+	m_running = true;
 }
 
 Application::~Application()
@@ -47,11 +35,10 @@ Application::~Application()
 
 int Application::Run()
 {
-	std::thread first(thread_func,(void*)0);
-	std::thread second(thread_func,(void*)1);
-
-	first.join();
-	second.join();
+	while(m_running)
+	{
+		// do stuff
+	}
 
 	return (int)StopCode::CleanStop;
 }

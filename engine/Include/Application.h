@@ -10,5 +10,7 @@ public:
 private:
 	void ThreadFunc(void* p_init);
 
+	bool m_running;
+
 };
 
