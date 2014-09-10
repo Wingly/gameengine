@@ -36,7 +36,7 @@ public:
 	{
 	}
 	
-	T* getFreeBlock()
+	T* getBlock()
 	{
 		if(m_firstFree == nullptr)
 		{
@@ -46,5 +46,15 @@ public:
 
 		m_firstFree = reinterpret_cast<uint64_t*>(*m_firstFree);
 		return local;
+	}
+
+	void freeBlock(T* p_block)
+	{
+
+		//We're gonna need some kind of refcount thingamajig
+		uint64_t* block = (uint64_t*)p_block;
+		delete p_block;
+		*block = (uint64_t)m_firstFree;
+		m_firstFree = block;
 	}
 };

@@ -1,28 +1,24 @@
 #pragma once
 
-template <class T>
-class MemPool
+class MemStack
 {
-public:
-	
-	MemPool(unsigned p_numBlocks, unsigned p_sizeOfBlock) 
-	{
-		m_block = (T*)malloc(p_numBlocks*p_sizeOfBlock);
-		m_nextBlock = m_block;
-	}
+private:
+	void* m_start;
+	void* m_current;
 
-	T* getFreeBlock()
+public:	
+	MemStack(unsigned int stacksize);
+
+	~MemStack();
+
+	void PopAll();
+
+	template <class T>
+	T* PushObject()
 	{
 		T* returnblock = m_nextBlock;
 		m_nextBlock += sizeof(T);
 		return returnblock; 
 	}
-
-	~MemPool()
-	{
-	}
-
-	T* m_block;
-	T* m_nextBlock;
 };
 

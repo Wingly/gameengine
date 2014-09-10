@@ -15,16 +15,22 @@ enum class StopCode
 Application::Application()
 {
 	MemPool<float> a(5);
-	float* b = a.getFreeBlock();
+	
+	float* b = a.getBlock();
 	*b = 1.0f;
 
-	float* c = a.getFreeBlock();
+	float* c = a.getBlock();
 	*c = 2.0f;
 
-	float* d = a.getFreeBlock();
+	float* d = a.getBlock();
 	*d = 3.0f;
 
 	m_running = true;
+
+	a.freeBlock(b);
+	float* e = a.getBlock();
+	b = a.getBlock();
+	int dadadab = 2;
 }
 
 Application::~Application()
