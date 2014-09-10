@@ -27,7 +27,7 @@ void thread_func(void* init_value)
 
 Application::Application()
 {
-	MemPool<float> a(5, sizeof(float));
+	MemPool<float> a(5);
 	float* b = a.getFreeBlock();
 	*b = 1.0f;
 

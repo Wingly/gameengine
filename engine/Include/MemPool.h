@@ -1,14 +1,5 @@
 #pragma once
 
-class Block
-{
-public:
-	Block() {};
-	~Block() {};
-	void* m_prev;
-	void* m_next;
-};
-
 template <class T>
 class MemPool
 {
@@ -17,29 +8,29 @@ private:
 	void* m_start;
 
 	void* m_firstFree;
-	void* m_lastFilled;
+	//void* m_lastFree;
 
 	unsigned int m_numBlocks;
 	unsigned int m_sizeOfBlock;
 
 public:
 	
-	MemPool(unsigned p_numBlocks, unsigned p_sizeOfBlock) 
+	MemPool(unsigned p_numBlocks) 
 	{
 		m_numBlocks = p_numBlocks;
-		m_sizeOfBlock = p_sizeOfBlock;
+		m_sizeOfBlock = sizeof(T);
 
-		m_start = malloc(p_numBlocks * p_sizeOfBlock);
-		m_firstFree = m_block;
-		m_lastFilled = nullptr;
+		m_start = malloc(p_numBlocks * m_sizeOfBlock);
+		m_firstFree = m_start;
+		//m_lastFree = nullptr;
 
-		Block* local = (Block*)m_firstFree;
+		char** local = (char**)m_firstFree;
 		for(unsigned int i = 0; i < p_numBlocks-1; i++)
 		{
-			local->m_next = local + p_sizeOfBlock;
-
+			*local = local + m_sizeOfBlock;
+			local = local + m_sizeOfBlock;
 		}
-		local->m_next = m_firstFree;
+		*local = nullptr;
 	}
 
 	~MemPool()
@@ -48,24 +39,12 @@ public:
 	
 	T* getFreeBlock()
 	{
+		if(m_firstFree == nullptr)
+		{
+			//Inget ledigt minne!
+		}
 		T* local = (T*)m_firstFree;
-
-		Block* newFirstFree	= dymamic_cast<Block*>(m_firstFree->m_next);		// Get next block that is supposed to be first.
-		Block* prev			= dymamic_cast<Block*>(local->m_prev);
-
-		// Update prev	
-		newFirstFree->m_prev = prev;
-
-		// Update previous block's next pointer
-		prev->m_next = first;
-
-		//
-		(Block*)m_lastFilled->m_next->m_prev			= (Block*)local; // 
-		(Block*)m_lastFilled->m_next					= (Block*)local;
-
-		//
-		(Block*)local->m_prev = (Block*)m_lastFilled;
-		(Block*)local->m_next = (Block*)m_start;
+		m_firstFree = *m_firstFree;
 
 		return local;
 	}
