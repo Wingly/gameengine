@@ -2,12 +2,19 @@
 
 #include <stdint.h>
 
+struct Marker
+{
+	uint32_t* mark;
+	int id;
+};
+
 static const unsigned int ALIGNMENT = 16;
 class MemStack
 {
 private:
 	uint32_t* m_start;
 	uint32_t* m_current;
+	Marker m_currentMarker;
 	
 public:	
 	MemStack(unsigned int stacksize);
@@ -32,6 +39,10 @@ public:
 		m_current += sizeof(T+adjustment);
 		return returnblock; 
 	}
+
+	bool Free(Marker p_marker);
+
+	Marker GetMarker();
 
 };
 
