@@ -2,7 +2,7 @@
 #include <stdlib.h>
 MemStack::MemStack(unsigned stacksize)
 {
-	m_start = malloc(stacksize);
+	m_start = (uint32_t*)malloc(stacksize);
 	m_current = m_start;
 }
 
@@ -10,11 +10,11 @@ MemStack::MemStack(unsigned stacksize)
 MemStack::~MemStack()
 {
 	//delete all
+
 }
 
-void MemStack::PopAll()
+void MemStack::Wipe()
 {
-	//pointer gonna be annoying
-
+	m_current = m_start;
 }
 
