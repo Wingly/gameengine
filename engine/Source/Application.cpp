@@ -14,7 +14,7 @@ enum class StopCode
 
 Application::Application()
 {
-	MemPool<float> a(5);
+	MemPool<float> a(5, 4);
 	
 	float* b = a.getBlock();
 	*b = 1.0f;
