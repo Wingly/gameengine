@@ -8,7 +8,6 @@ struct Marker
 	int id;
 };
 
-static const unsigned int ALIGNMENT = 16;
 class MemStack
 {
 private:
@@ -17,7 +16,7 @@ private:
 	Marker m_currentMarker;
 	
 public:	
-	MemStack(unsigned int stacksize);
+	MemStack(unsigned int p_stacksize);
 
 	~MemStack();
 
@@ -27,16 +26,17 @@ public:
 	T* Push()
 	{
 		//Check end of stack
+
 		uint32_t mask = ALIGNMENT - 1;
-		uint32_t misalignment = (*m_current & mask);
+		uint32_t misalignment = ((uint32_t)m_current & mask);
 		uint32_t adjustment = ALIGNMENT - misalignment;
 		
-		T* returnblock = *m_current + adjustment;
+		T* returnblock = (T*)((uint32_t)m_current + adjustment);
 
 		uint32_t* metadata = (uint32_t*)(m_current-4);
 		*metadata = adjustment;
 
-		m_current += sizeof(T+adjustment);
+		m_current += sizeof(T)+adjustment;
 		return returnblock; 
 	}
 

@@ -1,5 +1,9 @@
 #pragma once
 
+#include <stdint.h>
+
+static const unsigned int ALIGNMENT = 16;
+
 template <class T>
 class MemPool
 {
@@ -14,18 +18,18 @@ private:
 
 public:
 	
-	MemPool(unsigned p_numBlocks, unsigned p_alignment) 
+	MemPool(unsigned p_numBlocks) 
 	{
 		m_numBlocks = p_numBlocks;
 		m_sizeOfBlock = sizeof(T);
 
-		uint32_t raw = (uint32_t*)malloc(p_numBlocks * m_sizeOfBlock + p_alignment);
+		uint32_t* raw = (uint32_t*)malloc(p_numBlocks * m_sizeOfBlock + ALIGNMENT);
 
-		uint32_t mask = p_alignment - 1;
-		uint32_t misalignment = (raw & mask);
-		uint32_t adjustment = p_alignment - misalignment;
+		uint32_t mask = ALIGNMENT - 1;
+		uint32_t misalignment = ((uint32_t)raw & mask);
+		uint32_t adjustment = ALIGNMENT - misalignment;
 
-		m_start = raw + adjustment;
+		m_start = (uint32_t*)((uint32_t)raw + adjustment);
 		
 		uint32_t* metadata = (uint32_t*)(m_start-4);
 		*metadata = adjustment;
@@ -61,9 +65,8 @@ public:
 	void freeBlock(T* p_block)
 	{
 
-		//We're gonna need some kind of refcount thingamajig
 		uint32_t* block = (uint32_t*)p_block;
-		delete p_block;
+		//delete p_block;
 		*block = (uint32_t)m_firstFree;
 		m_firstFree = block;
 	}

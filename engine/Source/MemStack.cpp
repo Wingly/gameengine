@@ -22,9 +22,10 @@ void MemStack::Wipe()
 
 bool MemStack::Free( Marker p_marker )
 {
-	if(m_currentMarker.id - p_marker.id > 1)
+	if(m_currentMarker.id == p_marker.id)
 	{
-		m_currentMarker = p_marker;
+		//pls align
+		m_currentMarker.id--;
 		m_current = m_currentMarker.mark;
 		return true;
 	}
@@ -34,6 +35,8 @@ bool MemStack::Free( Marker p_marker )
 
 Marker MemStack::GetMarker()
 {
+	m_currentMarker.mark = m_current;
+	m_currentMarker.id++;
 	return m_currentMarker;
 }
 
