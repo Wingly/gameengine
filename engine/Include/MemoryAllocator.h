@@ -15,6 +15,7 @@ public:
 		MemPool<T>* pool = new MemPool<T>(p_numBlocks);
 		return pool;
 	}
-	MemStack* CreateStack(unsigned int p_stacksize);
+	//Note: If you allocate more than some unknown high value, think INT_MAX~ish, you're gonna have a bad bad time
+	MemStack* CreateStack(unsigned int p_stacksize); 
 
 };
