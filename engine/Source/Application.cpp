@@ -21,6 +21,7 @@ enum class StopCode
 
 Application::Application()
 {
+
 	
 
 	MemoryAllocator* memAl = new MemoryAllocator();

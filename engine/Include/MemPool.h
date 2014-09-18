@@ -19,7 +19,7 @@ private:
 
 public:
 	
-	MemPool(unsigned p_numBlocks, unsigned p_alignment) 
+	MemPool(unsigned p_numBlocks, unsigned p_alignment)		// TODO remove alignment
 	{
 		m_numBlocks = p_numBlocks;
 		m_sizeOfBlock = sizeof(T);
@@ -27,11 +27,12 @@ public:
 		uint32_t* raw = (uint32_t*)malloc(p_numBlocks * m_sizeOfBlock + p_alignment);
 
 		uint32_t mask = p_alignment - 1;
-		uint32_t misalignment = ((uint32_t)raw & mask);
+
+		uint32_t misalignment = (reinterpret_cast<uint32_t>(raw) & mask);
 		uint32_t adjustment = p_alignment - misalignment;
 
-		m_start = (uint32_t*)((uint32_t)raw + adjustment);
-		
+		m_start = reinterpret_cast<uint32_t*>(reinterpret_cast<uint32_t>(raw) + adjustment);
+
 		uint32_t* metadata = (uint32_t*)(m_start-4);
 		*metadata = adjustment;
 		
