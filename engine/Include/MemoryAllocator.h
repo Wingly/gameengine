@@ -10,12 +10,14 @@ public:
 	~MemoryAllocator();
 
 	template <class T>
-	MemPool<T>* CreatePool(unsigned int p_numBlocks) 
+	MemPool<T>* CreatePool(unsigned int p_numBlocks, unsigned int p_alignment) 
 	{
-		MemPool<T>* pool = new MemPool<T>(p_numBlocks);
+		MemPool<T>* pool = new MemPool<T>(p_numBlocks, p_alignment);
 		return pool;
 	}
+
 	//Note: If you allocate more than some unknown high value, think INT_MAX~ish, you're gonna have a bad bad time
-	MemStack* CreateStack(unsigned int p_stacksize); 
+	MemStack* CreateStack(unsigned int p_stacksize, unsigned int p_alignment);
+
 
 };

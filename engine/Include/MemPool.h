@@ -1,8 +1,11 @@
 #pragma once
 
 #include <stdint.h>
+
 #include <atomic>
-static const unsigned int ALIGNMENT = 16;
+
+
+
 
 template <class T>
 class MemPool
@@ -11,23 +14,29 @@ private:
 	// Startpointer
 	uint32_t* m_start;
 	
+
 	std::atomic<uint32_t*> m_firstFree;
+
+
 
 	unsigned int m_numBlocks;
 	unsigned int m_sizeOfBlock;
 
 public:
 	
-	MemPool(unsigned p_numBlocks) 
+	MemPool(unsigned p_numBlocks, unsigned p_alignment) 
 	{
 		m_numBlocks = p_numBlocks;
 		m_sizeOfBlock = sizeof(T);
-		std::atomic_init(m_firstFree);
-		uint32_t* raw = (uint32_t*)malloc(p_numBlocks * m_sizeOfBlock + ALIGNMENT);
 
-		uint32_t mask = ALIGNMENT - 1;
+		std::atomic_init(m_firstFree);
+		uint32_t* raw = (uint32_t*)malloc(p_numBlocks * m_sizeOfBlock + p_alignment);
+
+
+
+		uint32_t mask = p_alignment - 1;
 		uint32_t misalignment = ((uint32_t)raw & mask);
-		uint32_t adjustment = ALIGNMENT - misalignment;
+		uint32_t adjustment = p_alignment - misalignment;
 
 		m_start = (uint32_t*)((uint32_t)raw + adjustment);
 		
@@ -54,6 +63,7 @@ public:
 	
 	T* getBlock()
 	{
+
 		if((uint32_t*)std::atomic_load(m_firstFree) == nullptr)
 		{
 			//Inget ledigt minne!
@@ -61,13 +71,12 @@ public:
 		
 		T* local = (T*)std::atomic_fetch_add((uint32_t)m_firstFree,(sizeof(T)));
 
-	//	m_firstFree = reinterpret_cast<uint32_t*>(*m_firstFree);
+
 		return local;
 	}
 
 	void freeBlock(T* p_block)
 	{
-
 		uint32_t* block = (uint32_t*)p_block;
 		//delete p_block;
 		*block = (uint32_t)m_firstFree;
