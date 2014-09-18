@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <mutex>
 
 static const unsigned int ALIGNMENT = 16;
 
@@ -12,22 +13,22 @@ private:
 	uint32_t* m_start;
 	
 	uint32_t* m_firstFree;
-
+	std::mutex m_lock;
 	unsigned int m_numBlocks;
 	unsigned int m_sizeOfBlock;
 
 public:
 	
-	MemPool(unsigned p_numBlocks) 
+	MemPool(unsigned p_numBlocks, unsigned p_alignment) 
 	{
 		m_numBlocks = p_numBlocks;
 		m_sizeOfBlock = sizeof(T);
 
-		uint32_t* raw = (uint32_t*)malloc(p_numBlocks * m_sizeOfBlock + ALIGNMENT);
+		uint32_t* raw = (uint32_t*)malloc(p_numBlocks * m_sizeOfBlock + p_alignment);
 
-		uint32_t mask = ALIGNMENT - 1;
+		uint32_t mask = p_alignment - 1;
 		uint32_t misalignment = ((uint32_t)raw & mask);
-		uint32_t adjustment = ALIGNMENT - misalignment;
+		uint32_t adjustment = p_alignment - misalignment;
 
 		m_start = (uint32_t*)((uint32_t)raw + adjustment);
 		
@@ -52,6 +53,7 @@ public:
 	
 	T* getBlock()
 	{
+		m_lock.lock();
 		if(m_firstFree == nullptr)
 		{
 			//Inget ledigt minne!
@@ -59,15 +61,17 @@ public:
 		T* local = (T*)m_firstFree;
 
 		m_firstFree = reinterpret_cast<uint32_t*>(*m_firstFree);
+		m_lock.unlock();
 		return local;
 	}
 
 	void freeBlock(T* p_block)
 	{
-
+		m_lock.lock();
 		uint32_t* block = (uint32_t*)p_block;
 		//delete p_block;
 		*block = (uint32_t)m_firstFree;
 		m_firstFree = block;
+		m_lock.unlock();
 	}
 };

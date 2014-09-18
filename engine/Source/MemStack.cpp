@@ -1,11 +1,13 @@
 #include "engine\Include\MemStack.h"
 #include <stdlib.h>
-MemStack::MemStack(unsigned stacksize)
+MemStack::MemStack(unsigned p_stacksize, unsigned p_alignment)
 {
-	m_start = (uint32_t*)malloc(stacksize);
+	m_size = p_stacksize;
+	m_start = (uint32_t*)malloc(p_stacksize);
 	m_current = m_start;
-	m_currentMarker.mark = m_current;
-	m_currentMarker.id = 0;
+	m_alignment = p_alignment;
+	//m_currentMarker.mark = m_current;
+	//m_currentMarker.id = 0;
 }
 
 
@@ -19,7 +21,7 @@ void MemStack::Wipe()
 {
 	m_current = m_start;
 }
-
+/*
 bool MemStack::Free( Marker p_marker )
 {
 	if(m_currentMarker.id == p_marker.id)
@@ -40,3 +42,4 @@ Marker MemStack::GetMarker()
 	return m_currentMarker;
 }
 
+*/

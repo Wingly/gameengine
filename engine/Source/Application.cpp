@@ -10,16 +10,24 @@ enum class StopCode
 	CrashStop
 };
 
-struct testStruct {
-	float hej;
-	int hureleget;
-	char testet;
+struct Particle {
+	float lifeTime;
+	float startSpeed;
+	float startX;
+	float startY;
+	float startZ;
+	float dirX;
+	float dirY;
+	float dirZ;
+	float colR;
+	float colG;
+	float colB;
 };
 
 Application::Application()
 {
 	MemoryAllocator* memAl = new MemoryAllocator();
-	MemPool<float>* a = memAl->CreatePool<float>(5);
+	MemPool<float>* a = memAl->CreatePool<float>(5, 16);
 	
 	float* b = a->getBlock();
 	*b = 1.0f;
@@ -30,30 +38,14 @@ Application::Application()
 	float* d = a->getBlock();
 	*d = 3.0f;
 
-	MemPool<testStruct>* struktur = memAl->CreatePool<testStruct>(5);
-	testStruct* sak = struktur->getBlock();
-	sak->hej = 1.0f;
-	sak->hureleget = 500;
-	sak->testet = 'c';
-
 	m_running = true;
 
 	a->freeBlock(b);
 	float* e = a->getBlock();
 	b = a->getBlock();
 
-	MemStack* stack = memAl->CreateStack(200000);
+	MemStack* stack = memAl->CreateStack(200000, 16);
 
-	int* hej = stack->Push<int>();
-	*hej = 5;
-	Marker markymark = stack->GetMarker();
-	float* dej = stack->Push<float>();
-	*dej = 10.0f;
-	int dadadab = 2;
-	stack->Free(markymark);
-	float* mej = stack->Push<float>();
-	*mej = 13131.0f;
-	int hejsan = 3;
 }
 
 Application::~Application()
