@@ -1,40 +1,21 @@
-#
+#pragma once
 
 class Clock
 {
-private:
-	unsigned long long m_timeCycles;	// 64 bit unsigned int
-	float m_timeScale;					// 32 bit floating point
-	bool m_isPaused;
-	
-	static float s_cyclesPerSecond;
-
-	static inline unsigned long long secondsToCycles(float timeSeconds)
-	{
-		return (unsigned long long)(timeSeconds * s_cyclesPerSecond);
-	}
-	
-	//	WARNING: Dangerous -- only use to convert small
-	// durations into seconds
-	static inline float cyclesToSeconds(float timeSeconds)
-	{
-		return (float)(timeSeconds / s_cyclesPerSecond);
-	}
-	
 public:
-	// Call this when the game first starts up.
-	static void init()
-	{
-	}
-
-	// Construct a clock
-	explicit Clock(float startTimeSeconds = 0.0f) :
-		m_timeCycles(startTimeSeconds),	
+		// Construct a clock
+	Clock(float startTimeSeconds = 0.0f) :
+		m_timeCycles(secondsToCycles(startTimeSeconds)),	
 		m_timeScale(1.0f),	// default to unscaled
 		m_isPaused(false)	// default to running
 	{
 	}
 
+	// Call this when the game first starts up.
+	static void init()
+	{
+		s_cyclesPerSecond = (float)5.0f;
+	}
 
 	// Return the current time in cycles. NOTE that we do not return absolute time measurements in floating points seconds,
 	// because a 32-bit float dosen't have enough precision. See calcDeltaSeconds().
@@ -82,4 +63,25 @@ public:
 			m_timeCycles += dtScaledCycles;
 		}
 	}
+
+private:
+	unsigned long long m_timeCycles;	// 64 bit unsigned int
+	float m_timeScale;					// 32 bit floating point
+	bool m_isPaused;
+	
+	static float s_cyclesPerSecond;
+
+	static inline unsigned long long secondsToCycles(float timeSeconds)
+	{
+		return (unsigned long long)(timeSeconds * s_cyclesPerSecond);
+	}
+	
+	//	WARNING: Dangerous -- only use to convert small
+	// durations into seconds
+	static inline float cyclesToSeconds(float timeSeconds)
+	{
+		return (float)(timeSeconds / s_cyclesPerSecond);
+	}
+	
 };
+float Clock::s_cyclesPerSecond = 0.0f;
