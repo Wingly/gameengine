@@ -43,6 +43,8 @@ public:
 private:
 	void ThreadFunc(void* p_init);
 	MemPool<Particle>* m_pool;
+	void Mandelbrot(float p_width, float p_height, unsigned int* p_pixMap );
+	void writeTga(unsigned int* p_pixmap, unsigned int p_width, unsigned int p_height, char* p_name);
 	bool m_running;
 
 	Particle* m_particle[NUM_THREADS];
