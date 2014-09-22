@@ -2,12 +2,9 @@
 
 #include <thread>
 #include <stdio.h>
+#include <vector>
 
-static const unsigned int NUM_THREADS = 4;
-static const unsigned int NUM_BLOCKS = 1024;
-static const unsigned int NUM_PARTICLES_PER_THREAD = NUM_BLOCKS/NUM_THREADS;
 
-static const unsigned int RUN_PARTICLE_TEST = true;
 
 
 enum class StopCode
@@ -18,33 +15,10 @@ enum class StopCode
 };
 
 
-
 Application::Application()
 {
-
-	
-
 	MemoryAllocator* memAl = new MemoryAllocator();
-	MemPool<float>* a = memAl->CreatePool<float>(5, 16);
 	m_pool = memAl->CreatePool<Particle>(NUM_BLOCKS, 16);
-	
-	float* b = a->getBlock();
-	*b = 1.0f;
-
-	float* c = a->getBlock();
-	*c = 2.0f;
-
-	float* d = a->getBlock();
-	*d = 3.0f;
-
-	m_running = true;
-
-	a->freeBlock(b);
-	float* e = a->getBlock();
-	b = a->getBlock();
-
-	MemStack* stack = memAl->CreateStack(200000, 16);
-
 }
 
 Application::~Application()
@@ -52,16 +26,41 @@ Application::~Application()
 	
 }
 
-void Application::ThreadInit()
+
+void ThreadRun(threadParam param)
 {
 	if(RUN_PARTICLE_TEST)
 	{
-		Particle* particles[NUM_PARTICLES_PER_THREAD];// = new Particle[];
+		std::vector<Particle*> particle;// = new std::vector<Particle*>();
+		
 		for(int i = 0; i < NUM_PARTICLES_PER_THREAD; i++) 
 		{
-			particles[i] = m_pool->getBlock();
+			particle.push_back(param.pool->getBlock());
+			particle.at(i)->lifeTime = rand() % 2000 + 1;
 		}
-		
+
+		float emissionTime = 0.0f;
+		param.freeBlocks = 0;
+		while(--param.runTime) 
+		{
+			emissionTime++;
+			for (int i = 0; i < particle.size(); i++ )
+			{
+				particle.at(i)->lifeTime--;
+				if(particle.at(i)->lifeTime <= 0)
+				{
+					param.pool->freeBlock(particle.at(i));
+					particle.erase(particle.begin() + i);
+					param.freeBlocks++;
+				}
+			}
+
+			if(emissionTime >= param.emissionRate && param.freeBlocks > 0)
+			{
+				particle.push_back(param.pool->getBlock());
+				param.freeBlocks--;
+			}
+		}
 	}
 	else
 	{
@@ -69,18 +68,22 @@ void Application::ThreadInit()
 	}
 }
 
-void Application::ThreadRun()
-{
-
-}
-
 
 int Application::Run()
 {
-	while(m_running)
-	{
-		ThreadRun();
+	srand (time(NULL));
+	std::thread thread[NUM_THREADS];
+	threadParam params;
+	for(int i = 0; i < NUM_THREADS; i++) {
+		params.emissionRate = rand() % 10000 + 1000;
+		params.freeBlocks = 0;
+		params.runTime = 10000;
+		params.pool = m_pool;
+		thread[i] = std::thread(ThreadRun, params);
+
+		thread[i].join();
 	}
+
 
 	return (int)StopCode::CleanStop;
 }
