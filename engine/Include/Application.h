@@ -37,7 +37,6 @@ public:
 	Application();
 	~Application();
 
-	//void ThreadRun(threadParam param);
 	int Run();
 
 private:

@@ -1,11 +1,14 @@
 #include "engine\Include\MemStack.h"
 #include <stdlib.h>
+
+
 MemStack::MemStack(unsigned p_stacksize, unsigned p_alignment)
 {
 	m_size = p_stacksize;
 	m_start = (uint32_t*)malloc(p_stacksize);
 	m_current = m_start;
 	m_alignment = p_alignment;
+	m_lock.clear();
 	//m_currentMarker.mark = m_current;
 	//m_currentMarker.id = 0;
 }
