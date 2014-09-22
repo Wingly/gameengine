@@ -22,10 +22,12 @@ private:
 	}
 	
 public:
+	// Call this when the game first starts up.
 	static void init()
 	{
 	}
 
+	// Construct a clock
 	explicit Clock(float startTimeSeconds = 0.0f) :
 		m_timeCycles(startTimeSeconds),	
 		m_timeScale(1.0f),	// default to unscaled
@@ -33,11 +35,15 @@ public:
 	{
 	}
 
+
+	// Return the current time in cycles. NOTE that we do not return absolute time measurements in floating points seconds,
+	// because a 32-bit float dosen't have enough precision. See calcDeltaSeconds().
 	unsigned long long getTimeCycles() const
 	{
 		return m_timeCycles;
 	}
 
+	// This function should be called once per frame with the real measured time in delta in seconds.
 	void update(float dtRealSeconds)
 	{
 		if(!m_isPaused)
@@ -76,9 +82,4 @@ public:
 			m_timeCycles += dtScaledCycles;
 		}
 	}
-
-
-
-
-
 };
