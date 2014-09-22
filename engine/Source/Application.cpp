@@ -27,7 +27,24 @@ struct Particle {
 	float colG;
 	float colB;
 };
-
+void ThreadFunc(void* p_init, int id)
+{
+	MemStack* temp = reinterpret_cast<MemStack*>(p_init);
+	int brake = 0;
+	while(brake < 10)
+	{
+		brake++;
+		int* hej = temp->Push<int>(id);
+		*hej = 5;
+		//Marker markymark = stack->GetMarker();
+		float* dej = temp->Push<float>(id);
+		*dej = 10.0f;
+		int dadadab = 2;
+	//	stack->Free(markymark);
+		float* mej = temp->Push<float>(id);
+		*mej = 13131.0f;
+	}
+}
 Application::Application()
 {
 	MemoryAllocator* memAl = new MemoryAllocator();
@@ -41,29 +58,34 @@ Application::Application()
 
 	float* d = a->getBlock();
 	*d = 3.0f;
-
+	
 	m_running = true;
 
 	a->freeBlock(b);
 	float* e = a->getBlock();
 	b = a->getBlock();
-
+	
 	MemStack* stack = memAl->CreateStack(200000 + TOTAL_SIZE, 16);
+	std::thread ett = std::thread(ThreadFunc,(void*)stack, 1);
+	std::thread tva = std::thread(ThreadFunc,(void*)stack, 2);
+	std::thread tre = std::thread(ThreadFunc,(void*)stack, 3);
+	ett.join();
+	tva.join();
+	tre.join();
+//	//int* hej = stack->Push<int>();
+//	*hej = 5;
+//	//Marker markymark = stack->GetMarker();
+////	float* dej = stack->Push<float>();
+//	*dej = 10.0f;
+//	int dadadab = 2;
+////	stack->Free(markymark);
+//	float* mej = stack->Push<float>();
+//	*mej = 13131.0f;
+//	int hejsan = 3;
 
-	int* hej = stack->Push<int>();
-	*hej = 5;
-	//Marker markymark = stack->GetMarker();
-	float* dej = stack->Push<float>();
-	*dej = 10.0f;
-	int dadadab = 2;
-//	stack->Free(markymark);
-	float* mej = stack->Push<float>();
-	*mej = 13131.0f;
-	int hejsan = 3;
-
-	unsigned int* test = reinterpret_cast<unsigned int*>(stack->Push<unsigned int[TOTAL_SIZE]>());
+	/*unsigned int* test = reinterpret_cast<unsigned int*>(stack->Push<unsigned int[TOTAL_SIZE]>());
 	Mandelbrot(WIDTH, HEIGHT, test);
-	writeTga(test, WIDTH, HEIGHT, "Hej.tga");
+	writeTga(test, WIDTH, HEIGHT, "Hej.tga");*/
 	
 
 }
@@ -85,10 +107,7 @@ int Application::Run()
 }
 
 
-void Application::ThreadFunc(void* p_init)
-{
 
-}
 
 void Application::Mandelbrot(float p_width, float p_height, unsigned int* p_pixMap)
 {
