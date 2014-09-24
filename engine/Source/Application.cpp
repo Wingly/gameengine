@@ -18,6 +18,7 @@ enum class StopCode
 
 void ThreadFunc(void* p_init, int id)
 {
+	//int id = -1;
 	MemStack* temp = reinterpret_cast<MemStack*>(p_init);
 	int brake = 0;
 	while(brake < 10)
@@ -39,31 +40,19 @@ Application::Application()
 {
 	MemoryAllocator* memAl = new MemoryAllocator();
 	m_pool = memAl->CreatePool<Particle>(NUM_BLOCKS, 16);
+	m_stack = memAl->CreateStack(TOTAL_SIZE + 200000, 4); 
+	Run();
 
-	MemPool<float>* a = memAl->CreatePool<float>(5, 16);
-	
-	float* b = a->getBlock();
-	*b = 1.0f;
-
-	float* c = a->getBlock();
-	*c = 2.0f;
-
-	float* d = a->getBlock();
-	*d = 3.0f;
-	
-	m_running = true;
-
-	a->freeBlock(b);
-	float* e = a->getBlock();
-	b = a->getBlock();
-	
+	// STACK TEST //
+	/*
 	MemStack* stack = memAl->CreateStack(200000 + TOTAL_SIZE, 16);
-	std::thread ett = std::thread(ThreadFunc,(void*)stack, 1);
-	std::thread tva = std::thread(ThreadFunc,(void*)stack, 2);
-	std::thread tre = std::thread(ThreadFunc,(void*)stack, 3);
+	std::thread ett = std::thread(ThreadFunc,stack,1);
+	std::thread tva = std::thread(ThreadFunc,stack,2);
+	std::thread tre = std::thread(ThreadFunc,stack,3);
 	ett.join();
 	tva.join();
 	tre.join();
+	*/
 //	//int* hej = stack->Push<int>();
 //	*hej = 5;
 //	//Marker markymark = stack->GetMarker();
@@ -121,10 +110,15 @@ void ThreadRun(threadParam param)
 				particle.push_back(param.pool->getBlock());
 				param.freeBlocks--;
 			}
+			std::cout << param.runTime << "\n";
 		}
+		int hej = 0;
 	}
 	else
 	{
+		int workperthread = HEIGHT / (NUM_THREADS / 2); //Aslong as HEIGHT == WIDTH this will work
+		if(param.id % 2 == 0)
+			int lol;
 
 	}
 }
@@ -134,17 +128,22 @@ int Application::Run()
 {
 	srand (time(NULL));
 	std::thread thread[NUM_THREADS];
-	threadParam params;
+	
 	for(int i = 0; i < NUM_THREADS; i++) {
+		threadParam params;
 		params.emissionRate = rand() % 10000 + 1000;
 		params.freeBlocks = 0;
 		params.runTime = 10000;
 		params.pool = m_pool;
-		thread[i] = std::thread(ThreadRun, params);
+		params.stack = m_stack;
+		params.id = i;
+		params.pixmap = reinterpret_cast<unsigned int*>(m_stack->Push<unsigned int[TOTAL_SIZE]>(0));
 
+		thread[i] = std::thread(ThreadRun, params);
+	}
+	for(int i = 0; i < NUM_THREADS; i++) {
 		thread[i].join();
 	}
-
 
 	return (int)StopCode::CleanStop;
 }
@@ -152,15 +151,15 @@ int Application::Run()
 
 
 
-void Application::Mandelbrot(float p_width, float p_height, unsigned int* p_pixMap)
+void Application::Mandelbrot(int p_startX, int p_startY,float p_width, float p_height, unsigned int* p_pixMap)
 {
 	int i, j;
 	float xmin = -1.6f;
 	float xmax = 1.6f;
 	float ymin = -1.6f;
 	float ymax = 1.6f;
-	for (i = 0; i < p_height; i++) {
-		for (j = 0; j < p_width; j++) {
+	for (i = p_startY; i < p_height; i++) {
+		for (j = p_startX; j < p_width; j++) {
 			float b = xmin + j * (xmax - xmin) / p_width;
 			float a = ymin + i * (ymax - ymin) / p_height;
 			float sx = 0.0f;

@@ -28,7 +28,10 @@ struct threadParam
 	int emissionRate;
 	int freeBlocks;
 	int runTime;
+	int id;
+	unsigned int* pixmap;
 	MemPool<Particle>* pool;
+	MemStack* stack;
 };
 class MemoryAllocator;
 class Application
@@ -40,9 +43,10 @@ public:
 	int Run();
 
 private:
-	void ThreadFunc(void* p_init);
+	//void ThreadFunc(void* p_init);
 	MemPool<Particle>* m_pool;
-	void Mandelbrot(float p_width, float p_height, unsigned int* p_pixMap );
+	MemStack* m_stack;
+	void Mandelbrot(int p_startX, int p_startY,float p_width, float p_height, unsigned int* p_pixMap );
 	void writeTga(unsigned int* p_pixmap, unsigned int p_width, unsigned int p_height, char* p_name);
 	bool m_running;
 
