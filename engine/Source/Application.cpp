@@ -15,7 +15,7 @@ enum class StopCode
 	Restart,
 	CrashStop
 };
-
+/*
 void ThreadFunc(void* p_init, int id)
 {
 	//int id = -1;
@@ -35,13 +35,13 @@ void ThreadFunc(void* p_init, int id)
 		*mej = 13131.0f;
 	}
 }
-
+*/
 Application::Application()
 {
 	MemoryAllocator* memAl = new MemoryAllocator();
 	m_pool = memAl->CreatePool<Particle>(NUM_BLOCKS, 16);
 	m_stack = memAl->CreateStack(TOTAL_SIZE + 200000, 4); 
-	Run();
+	//Run();
 
 	// STACK TEST //
 	/*
@@ -74,6 +74,55 @@ Application::Application()
 Application::~Application()
 {
 	
+}
+
+void Mandelbrot(MemStack* p_stack, float p_startPos, float p_threadHeight, float p_width, float p_height, unsigned int* p_pixMap)
+{
+	
+	int* i = p_stack->Push<int>();
+	int* j = p_stack->Push<int>();
+	float* xmin = p_stack->Push<float>();
+	float* xmax = p_stack->Push<float>();
+	float* ymin = p_stack->Push<float>();
+	float* ymax = p_stack->Push<float>();
+	*xmin = -1.6f;
+	*xmax = 1.6f;
+	*ymin = -1.6f;
+	*ymax = 1.6f;
+	for (*i = (int)p_startPos; *i < ((int)p_startPos+p_threadHeight); *i++) {
+		for (*j = 0; *j < p_width; j++) {
+			float* b = p_stack->Push<float>();
+			float* a = p_stack->Push<float>();
+			*b = *xmin + *j * (*xmax - *xmin) / p_width;
+			*a = *ymin + *i * (*ymax - *ymin) / p_height;
+			float* sx = p_stack->Push<float>();
+			float* sy = p_stack->Push<float>();
+			*sx = 0.0f;
+			*sy = 0.0f;
+			int* ii = p_stack->Push<int>();
+			*ii = 0;
+			while (*sx + *sy <= 64.0f) {
+				float* xn = p_stack->Push<float>();
+				float* yn = p_stack->Push<float>();
+				*xn = *sx * *sx - *sy * *sy + *b;
+				*yn = 2 * *sx * *sy + *a;
+				*sx = *xn;
+				*sy = *yn;
+				*ii++;
+				if (*ii == 1500)	{
+					break;
+				}
+			}
+			if (*ii == 1500)	{
+				p_pixMap[*j+*i*(int)p_width] = 0;
+			}
+			else {
+				int* c = p_stack->Push<int>();
+				*c = (int)((*ii / 32.0f) * 256.0f);
+				p_pixMap[*j + *i *(int)p_width] = *c%256;
+			}
+		}
+	}
 }
 
 
@@ -110,15 +159,13 @@ void ThreadRun(threadParam param)
 				particle.push_back(param.pool->getBlock());
 				param.freeBlocks--;
 			}
-			std::cout << param.runTime << "\n";
 		}
-		int hej = 0;
 	}
 	else
 	{
-		int workperthread = HEIGHT / (NUM_THREADS / 2); //Aslong as HEIGHT == WIDTH this will work
-		if(param.id % 2 == 0)
-			int lol;
+		float workperthread = HEIGHT / (NUM_THREADS); //Aslong as HEIGHT == WIDTH this will work
+		float threadStartPos = workperthread * param.id;
+		Mandelbrot(param.stack, threadStartPos, workperthread, WIDTH, HEIGHT, param.pixmap);
 
 	}
 }
@@ -128,63 +175,34 @@ int Application::Run()
 {
 	srand (time(NULL));
 	std::thread thread[NUM_THREADS];
-	
+	unsigned int* pixmap;
+	if(!RUN_PARTICLE_TEST)
+		 pixmap = reinterpret_cast<unsigned int*>(m_stack->Push<unsigned int[WIDTH*HEIGHT]>());
 	for(int i = 0; i < NUM_THREADS; i++) {
 		threadParam params;
 		params.emissionRate = rand() % 10000 + 1000;
 		params.freeBlocks = 0;
 		params.runTime = 10000;
 		params.pool = m_pool;
-		params.stack = m_stack;
-		params.id = i;
-		params.pixmap = reinterpret_cast<unsigned int*>(m_stack->Push<unsigned int[TOTAL_SIZE]>(0));
-
+		if(!RUN_PARTICLE_TEST) 
+		{
+			params.stack = m_stack;
+			params.id = i;
+			params.pixmap = pixmap;
+		}
 		thread[i] = std::thread(ThreadRun, params);
 	}
 	for(int i = 0; i < NUM_THREADS; i++) {
 		thread[i].join();
 	}
-
+	if(!RUN_PARTICLE_TEST)
+		writeTga(pixmap, WIDTH, HEIGHT, "image.tga");
 	return (int)StopCode::CleanStop;
 }
 
 
 
 
-void Application::Mandelbrot(int p_startX, int p_startY,float p_width, float p_height, unsigned int* p_pixMap)
-{
-	int i, j;
-	float xmin = -1.6f;
-	float xmax = 1.6f;
-	float ymin = -1.6f;
-	float ymax = 1.6f;
-	for (i = p_startY; i < p_height; i++) {
-		for (j = p_startX; j < p_width; j++) {
-			float b = xmin + j * (xmax - xmin) / p_width;
-			float a = ymin + i * (ymax - ymin) / p_height;
-			float sx = 0.0f;
-			float sy = 0.0f;
-			int ii = 0;
-			while (sx + sy <= 64.0f) {
-				float xn = sx * sx - sy * sy + b;
-				float yn = 2 * sx * sy + a;
-				sx = xn;
-				sy = yn;
-				ii++;
-				if (ii == 1500)	{
-					break;
-				}
-			}
-			if (ii == 1500)	{
-				p_pixMap[j+i*(int)p_width] = 0;
-			}
-			else {
-				int c = (int)((ii / 32.0f) * 256.0f);
-				p_pixMap[j + i *(int)p_width] = c%256;
-			}
-		}
-	}
-}
 
 
 void Application::writeTga(unsigned int* p_pixmap, unsigned int p_width, unsigned int p_height, char* p_name)
