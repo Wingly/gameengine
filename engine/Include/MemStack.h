@@ -34,31 +34,26 @@ public:
 	void Wipe();
 
 	template <class T>
-	T* Push(int id)
+	T* Push()
 	{
-		
+
 		while(m_lock.test_and_set(std::memory_order_acquire))
 		{
-			std::cout << "Im locked :(  id: " << id << std::endl ;
 			//Keep on spinning in the free world
 		}
-		std::cout << "doing work" << id << std::endl ;
-		//m_lock.lock();
 		uint32_t mask = m_alignment - 1;
 		uint32_t misalignment = ((uint32_t)m_current & mask);
 		uint32_t adjustment = m_alignment - misalignment;
 		
 		T* returnblock = (T*)((uint32_t)m_current + adjustment);
 		int i = 0;
-		while(i < 100000)
-		{
-			i++;
-		}
-		uint32_t* metadata = (uint32_t*)(m_current-4);
-		*metadata = adjustment;
+		
+		//uint32_t* metadata = (uint32_t*)(m_current-4);
+		//*metadata = adjustment;
 		//Check end of stack
+		uint32_t adsfkahsdfa = sizeof(T);
 		m_current += sizeof(T)+adjustment;
-		std::cout << "Releasing lock" << id << std::endl ;
+
 		m_lock.clear(std::memory_order_release);
 		return returnblock; 
 	}

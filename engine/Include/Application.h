@@ -7,7 +7,7 @@ static const unsigned int NUM_THREADS = 4;
 static const unsigned int NUM_BLOCKS = 1024;
 static const unsigned int NUM_PARTICLES_PER_THREAD = NUM_BLOCKS/NUM_THREADS;
 
-static const unsigned int RUN_PARTICLE_TEST = true;
+static const unsigned int RUN_PARTICLE_TEST = false;
 
 struct float3
 {
@@ -46,7 +46,7 @@ private:
 	//void ThreadFunc(void* p_init);
 	MemPool<Particle>* m_pool;
 	MemStack* m_stack;
-	void Mandelbrot(int p_startX, int p_startY,float p_width, float p_height, unsigned int* p_pixMap );
+	//void Mandelbrot(float p_startPos,  float p_threadHeight, float p_width, float p_height, unsigned int* p_pixMap );
 	void writeTga(unsigned int* p_pixmap, unsigned int p_width, unsigned int p_height, char* p_name);
 	bool m_running;
 
