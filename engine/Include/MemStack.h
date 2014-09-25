@@ -25,9 +25,10 @@ private:
 	//std::atomic_flag m_lock =  ATOMIC_FLAG_INIT;
 	std::atomic_flag m_lock;
 	
-	
+	bool m_shared;
+
 public:	
-	MemStack(unsigned int p_stacksize, unsigned p_alignment);
+	MemStack(unsigned int p_stacksize, unsigned p_alignment, bool p_shared);
 
 	~MemStack();
 
@@ -37,7 +38,7 @@ public:
 	T* Push()
 	{
 
-		while(m_lock.test_and_set(std::memory_order_acquire))
+		while(m_lock.test_and_set(std::memory_order_acquire) && m_shared)
 		{
 			std::cout << "This should not happen in this version";
 			//Keep on spinning in the free world

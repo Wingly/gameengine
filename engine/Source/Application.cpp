@@ -41,6 +41,7 @@ Application::Application()
 	m_Al_The_Croc = new MemoryAllocator();
 	m_pool = m_Al_The_Croc->CreatePool<Particle>(NUM_BLOCKS, 16);
 	m_stack = m_Al_The_Croc->CreateStack(TOTAL_SIZE + 200000, 4); 
+	m_pool->init();
 	//Run();
 
 	// STACK TEST //
@@ -229,7 +230,7 @@ void Application::writeTga(unsigned int* p_pixmap, unsigned int p_width, unsigne
 			sprintf(buffer, "%c%c%c",
 				(p_pixmap[j+(i)*p_width]>>0)&0x000000ff,
 				(p_pixmap[j+i*p_width]>>0)&0x000000ff,
-				(p_pixmap[j+i*p_width]>>0)&0x000000ff);
+				(p_pixmap[j+i*p_width]>>8)&0x000000ff);
 			fwrite(buffer,sizeof(char),3,f);
 		}
 	}
