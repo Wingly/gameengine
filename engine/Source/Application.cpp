@@ -5,8 +5,8 @@
 #include <stdio.h>
 #include <vector>
 
-#define WIDTH 800
-#define HEIGHT 800
+#define WIDTH 2000
+#define HEIGHT 2000
 #define TOTAL_SIZE (HEIGHT * WIDTH *sizeof(int))
 
 enum class StopCode
@@ -38,9 +38,9 @@ void ThreadFunc(void* p_init, int id)
 */
 Application::Application()
 {
-	MemoryAllocator* memAl = new MemoryAllocator();
-	m_pool = memAl->CreatePool<Particle>(NUM_BLOCKS, 16);
-	m_stack = memAl->CreateStack(TOTAL_SIZE + 200000, 4); 
+	m_Al_The_Croc = new MemoryAllocator();
+	m_pool = m_Al_The_Croc->CreatePool<Particle>(NUM_BLOCKS, 16);
+	m_stack = m_Al_The_Croc->CreateStack(TOTAL_SIZE + 200000, 4); 
 	//Run();
 
 	// STACK TEST //
@@ -85,30 +85,31 @@ void Mandelbrot(MemStack* p_stack, float p_startPos, float p_threadHeight, float
 	float* xmax = p_stack->Push<float>();
 	float* ymin = p_stack->Push<float>();
 	float* ymax = p_stack->Push<float>();
+	float* b = p_stack->Push<float>();
+	float* a = p_stack->Push<float>();
+	float* xn = p_stack->Push<float>();
+	float* yn = p_stack->Push<float>();
+	int* ii = p_stack->Push<int>();
+	float* sx = p_stack->Push<float>();
+	float* sy = p_stack->Push<float>();
+	int* c = p_stack->Push<int>();
 	*xmin = -1.6f;
 	*xmax = 1.6f;
 	*ymin = -1.6f;
 	*ymax = 1.6f;
-	for (*i = (int)p_startPos; *i < ((int)p_startPos+p_threadHeight); *i++) {
-		for (*j = 0; *j < p_width; j++) {
-			float* b = p_stack->Push<float>();
-			float* a = p_stack->Push<float>();
+	for (*i = (int)p_startPos; *i < ((int)p_startPos+p_threadHeight); *i += 1) {
+		for (*j = 0; *j < p_width; *j += 1) {
 			*b = *xmin + *j * (*xmax - *xmin) / p_width;
 			*a = *ymin + *i * (*ymax - *ymin) / p_height;
-			float* sx = p_stack->Push<float>();
-			float* sy = p_stack->Push<float>();
 			*sx = 0.0f;
 			*sy = 0.0f;
-			int* ii = p_stack->Push<int>();
 			*ii = 0;
 			while (*sx + *sy <= 64.0f) {
-				float* xn = p_stack->Push<float>();
-				float* yn = p_stack->Push<float>();
-				*xn = *sx * *sx - *sy * *sy + *b;
-				*yn = 2 * *sx * *sy + *a;
-				*sx = *xn;
-				*sy = *yn;
-				*ii++;
+				*xn = (*sx) * (*sx) - (*sy) * (*sy) + (*b);
+				*yn = 2 * (*sx) * (*sy) + (*a);
+				*sx = (*xn);
+				*sy = (*yn);
+				*ii+=1; //Apparently ++ has precedence over a de-reference, The more you know™
 				if (*ii == 1500)	{
 					break;
 				}
@@ -117,7 +118,6 @@ void Mandelbrot(MemStack* p_stack, float p_startPos, float p_threadHeight, float
 				p_pixMap[*j+*i*(int)p_width] = 0;
 			}
 			else {
-				int* c = p_stack->Push<int>();
 				*c = (int)((*ii / 32.0f) * 256.0f);
 				p_pixMap[*j + *i *(int)p_width] = *c%256;
 			}
@@ -163,9 +163,12 @@ void ThreadRun(threadParam param)
 	}
 	else
 	{
+		std::cout << "Thread id: " << param.id << "entering work zone" << std::endl;
 		float workperthread = HEIGHT / (NUM_THREADS); //Aslong as HEIGHT == WIDTH this will work
 		float threadStartPos = workperthread * param.id;
-		Mandelbrot(param.stack, threadStartPos, workperthread, WIDTH, HEIGHT, param.pixmap);
+		MemStack* stack = param.al_the_croc->CreateStack(56, 4);
+		Mandelbrot(stack, threadStartPos, workperthread, WIDTH, HEIGHT, param.pixmap);
+		std::cout << "Thread id: " << param.id << "LEAVING work zone" << std::endl;
 
 	}
 }
@@ -184,6 +187,7 @@ int Application::Run()
 		params.freeBlocks = 0;
 		params.runTime = 10000;
 		params.pool = m_pool;
+		params.al_the_croc = m_Al_The_Croc;
 		if(!RUN_PARTICLE_TEST) 
 		{
 			params.stack = m_stack;

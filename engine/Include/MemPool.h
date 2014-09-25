@@ -73,7 +73,7 @@ public:
 		}
 		
 		T* local = (T*)m_firstFree;
-
+		m_firstFree = (uint32_t*)*m_firstFree;
 		m_lock.clear();
 		return local;
 	}
