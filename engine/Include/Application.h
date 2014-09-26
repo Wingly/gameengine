@@ -3,11 +3,11 @@
 #include <engine/Include/MemoryAllocator.h>
 #include <random>
 
-static const unsigned int NUM_THREADS = 1;
+static const unsigned int NUM_THREADS = 4;
 static const unsigned int NUM_BLOCKS = 1024;
 static const unsigned int NUM_PARTICLES_PER_THREAD = NUM_BLOCKS/NUM_THREADS;
-
-static const unsigned int RUN_PARTICLE_TEST = true;
+static const bool CUSTOM_ALLOCATION = true;
+static const bool RUN_PARTICLE_TEST = false;
 
 struct float3
 {

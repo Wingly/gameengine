@@ -15,61 +15,13 @@ enum class StopCode
 	Restart,
 	CrashStop
 };
-/*
-void ThreadFunc(void* p_init, int id)
-{
-	//int id = -1;
-	MemStack* temp = reinterpret_cast<MemStack*>(p_init);
-	int brake = 0;
-	while(brake < 10)
-	{
-		brake++;
-		int* hej = temp->Push<int>(id);
-		*hej = 5;
-		//Marker markymark = stack->GetMarker();
-		float* dej = temp->Push<float>(id);
-		*dej = 10.0f;
-		int dadadab = 2;
-	//	stack->Free(markymark);
-		float* mej = temp->Push<float>(id);
-		*mej = 13131.0f;
-	}
-}
-*/
+
 Application::Application()
 {
-	m_Al_The_Croc = new MemoryAllocator();
-	m_pool = m_Al_The_Croc->CreatePool<Particle>(NUM_BLOCKS, 16);
-	m_stack = m_Al_The_Croc->CreateStack(TOTAL_SIZE + 200000, 4); 
+	m_Al_The_Croc = new MemoryAllocator(CUSTOM_ALLOCATION);
+	m_pool = m_Al_The_Croc->CreatePool<Particle>(NUM_BLOCKS, 16, NUM_THREADS == 1 ? false : true);
+	m_stack = m_Al_The_Croc->CreateStack(TOTAL_SIZE + 200000, 4, NUM_THREADS == 1 ? false : true); 
 	m_pool->init();
-	//Run();
-
-	// STACK TEST //
-	/*
-	MemStack* stack = memAl->CreateStack(200000 + TOTAL_SIZE, 16);
-	std::thread ett = std::thread(ThreadFunc,stack,1);
-	std::thread tva = std::thread(ThreadFunc,stack,2);
-	std::thread tre = std::thread(ThreadFunc,stack,3);
-	ett.join();
-	tva.join();
-	tre.join();
-	*/
-//	//int* hej = stack->Push<int>();
-//	*hej = 5;
-//	//Marker markymark = stack->GetMarker();
-////	float* dej = stack->Push<float>();
-//	*dej = 10.0f;
-//	int dadadab = 2;
-////	stack->Free(markymark);
-//	float* mej = stack->Push<float>();
-//	*mej = 13131.0f;
-//	int hejsan = 3;
-
-	/*unsigned int* test = reinterpret_cast<unsigned int*>(stack->Push<unsigned int[TOTAL_SIZE]>());
-	Mandelbrot(WIDTH, HEIGHT, test);
-	writeTga(test, WIDTH, HEIGHT, "Hej.tga");*/
-	
-
 }
 
 Application::~Application()
@@ -126,12 +78,62 @@ void Mandelbrot(MemStack* p_stack, float p_startPos, float p_threadHeight, float
 	}
 }
 
+void MandelbrotNormalStack(MemStack* p_stack, float p_startPos, float p_threadHeight, float p_width, float p_height, unsigned int* p_pixMap)
+{
+	
+	int i;
+	int j;
+	float xmin; 
+	float xmax; 
+	float ymin; 
+	float ymax; 
+	float b,
+	float a;
+	float xn;
+	float yn;
+	int ii;
+	float sx;
+	float sy;
+	int c;
+	xmin = -1.6f;
+	xmax = 1.6f;
+	ymin = -1.6f;
+	ymax = 1.6f;
+	for (i = (int)p_startPos; i < ((int)p_startPos+p_threadHeight); i ++) {
+		for (j = 0; j < p_width; j ++) {
+			b = xmin + j * (xmax - xmin) / p_width;
+			a = ymin + i * (ymax - ymin) / p_height;
+			sx = 0.0f;
+			sy = 0.0f;
+			ii = 0;
+			while (sx + sy <= 64.0f) {
+				xn = (sx) * (sx) - (sy) * (sy) + (b);
+				yn = 2 * (sx) * (sy) + (a);
+				sx = (xn);
+				sy = (yn);
+				ii++; //Apparently ++ has precedence over a de-reference, The more you know™
+				if (ii == 1500)	{
+					break;
+				}
+			}
+			if (ii == 1500)	{
+				p_pixMap[j+ i*(int)p_width] = 0;
+			}
+			else {
+				c = (int)((ii / 32.0f) * 256.0f);
+				p_pixMap[j + i *(int)p_width] = c%256;
+			}
+		}
+	}
+}
+
+
 
 void ThreadRun(threadParam param)
 {
 	if(RUN_PARTICLE_TEST)
 	{
-		std::vector<Particle*> particle;// = new std::vector<Particle*>();
+		std::vector<Particle*> particle;
 		
 		for(int i = 0; i < NUM_PARTICLES_PER_THREAD; i++) 
 		{
@@ -167,8 +169,11 @@ void ThreadRun(threadParam param)
 		std::cout << "Thread id: " << param.id << "entering work zone" << std::endl;
 		float workperthread = HEIGHT / (NUM_THREADS); //Aslong as HEIGHT == WIDTH this will work
 		float threadStartPos = workperthread * param.id;
-		MemStack* stack = param.al_the_croc->CreateStack(56, 4);
-		Mandelbrot(stack, threadStartPos, workperthread, WIDTH, HEIGHT, param.pixmap);
+		MemStack* stack = param.al_the_croc->CreateStack(56, 4, false);
+		if(CUSTOM_ALLOCATION)
+			Mandelbrot(param.stack, threadStartPos, workperthread, WIDTH, HEIGHT, param.pixmap);
+		else
+			MandelbrotNormalStack(param.stack, threadStartPos, workperthread, WIDTH, HEIGHT, param.pixmap);
 		std::cout << "Thread id: " << param.id << "LEAVING work zone" << std::endl;
 
 	}
@@ -181,7 +186,13 @@ int Application::Run()
 	std::thread thread[NUM_THREADS];
 	unsigned int* pixmap;
 	if(!RUN_PARTICLE_TEST)
-		 pixmap = reinterpret_cast<unsigned int*>(m_stack->Push<unsigned int[WIDTH*HEIGHT]>());
+	{
+		if(CUSTOM_ALLOCATION)
+			pixmap = reinterpret_cast<unsigned int*>(m_stack->Push<unsigned int[WIDTH*HEIGHT]>());
+		else
+			pixmap = (unsigned int*)malloc(TOTAL_SIZE);
+
+	}
 	for(int i = 0; i < NUM_THREADS; i++) {
 		threadParam params;
 		params.emissionRate = rand() % 10000 + 1000;

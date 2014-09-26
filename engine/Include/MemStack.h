@@ -26,7 +26,6 @@ private:
 	std::atomic_flag m_lock;
 	
 	bool m_shared;
-
 public:	
 	MemStack(unsigned int p_stacksize, unsigned p_alignment, bool p_shared);
 
@@ -37,29 +36,29 @@ public:
 	template <class T>
 	T* Push()
 	{
-
-		while(m_lock.test_and_set(std::memory_order_acquire) && m_shared)
-		{
-			std::cout << "This should not happen in this version";
-			//Keep on spinning in the free world
-		}
-		size_t mask = m_alignment - 1;
-		size_t misalignment = ((size_t)m_current & mask);
-		size_t adjustment = m_alignment - misalignment;
+			while(m_lock.test_and_set(std::memory_order_acquire) && m_shared)
+			{
+				std::cout << "This should not happen in this version";
+				//Keep on spinning in the free world
+			}
+			size_t mask = m_alignment - 1;
+			size_t misalignment = ((size_t)m_current & mask);
+			size_t adjustment = m_alignment - misalignment;
 		
-		T* returnblock = (T*)(m_current /*+ adjustment*/);
+			T* returnblock = (T*)(m_current + adjustment);
 		
-		int i = sizeof(T);
-		int j = m_size;
-		/*uint32_t* metadata = (uint32_t*)((uint32_t)returnblock - 4);
-		*metadata = adjustment;*/
-		//Check end of stack
+			int i = sizeof(T);
+			int j = m_size;
+			uint32_t* metadata = (uint32_t*)((uint32_t)returnblock - 4);
+			*metadata = adjustment;
+			//Check end of stack
 		
-		i = i + (size_t)m_current;
-		m_current = (size_t*)i;/*+adjustment;*/
-		m_lock.clear(std::memory_order_release);
-		return returnblock; 
+			i = i + (size_t)m_current;
+			m_current = (size_t*)i;+adjustment;
+			m_lock.clear(std::memory_order_release);
+			return returnblock; 
 	}
+	
 
 	//bool Free(Marker p_marker);
 
