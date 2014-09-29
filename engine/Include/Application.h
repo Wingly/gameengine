@@ -1,6 +1,7 @@
 #pragma once
 
 #include <engine/Include/MemoryAllocator.h>
+#include <engine/Include/TestCases.h>
 #include <random>
 
 static const unsigned int NUM_THREADS = 4;
@@ -34,14 +35,22 @@ struct threadParam
 	MemStack* stack;
 	MemoryAllocator* al_the_croc;
 };
+
+// Forward declaratiuon
 class MemoryAllocator;
+/*namespace TestCases
+{
+	struct TestCase;
+}
+*/
+
 class Application
 {
 public:
 	Application();
 	~Application();
 
-	int Run();
+	int Run(TestCases::TestCase p_testCase);
 
 private:
 	//void ThreadFunc(void* p_init);

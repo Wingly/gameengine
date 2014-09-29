@@ -73,7 +73,6 @@ void GameTimer::Start()
 		mStopTime = 0;
 		mStopped = false;
 	}
-	Tick();
 }
 
 void GameTimer::Stop()

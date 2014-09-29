@@ -1,4 +1,5 @@
 #include <engine/Include/Application.h>
+#include <engine/Include/TestCases.h>
 
 #include <thread>
 #include <complex>
@@ -18,10 +19,12 @@ enum class StopCode
 
 Application::Application()
 {
+	/*
 	m_Al_The_Croc = new MemoryAllocator(CUSTOM_ALLOCATION);
 	m_pool = m_Al_The_Croc->CreatePool<Particle>(NUM_BLOCKS, 16, NUM_THREADS == 1 ? false : true);
 	m_stack = m_Al_The_Croc->CreateStack(TOTAL_SIZE + 200000, 4, NUM_THREADS == 1 ? false : true); 
 	m_pool->init();
+	*/
 }
 
 Application::~Application()
@@ -87,7 +90,7 @@ void MandelbrotNormalStack(MemStack* p_stack, float p_startPos, float p_threadHe
 	float xmax; 
 	float ymin; 
 	float ymax; 
-	float b,
+	float b;
 	float a;
 	float xn;
 	float yn;
@@ -127,99 +130,113 @@ void MandelbrotNormalStack(MemStack* p_stack, float p_startPos, float p_threadHe
 	}
 }
 
-
-
-void ThreadRun(threadParam param)
+void PoolTest(threadParam param)
 {
-	if(RUN_PARTICLE_TEST)
-	{
-		std::vector<Particle*> particle;
+	std::vector<Particle*> particle;
 		
-		for(int i = 0; i < NUM_PARTICLES_PER_THREAD; i++) 
+	for(int i = 0; i < NUM_PARTICLES_PER_THREAD; i++) 
+	{
+		particle.push_back(param.pool->getBlock());
+		particle.at(i)->lifeTime = rand() % 2000 + 1;
+	}
+
+	float emissionTime = 0.0f;
+	param.freeBlocks = 0;
+	while(--param.runTime) 
+	{
+		emissionTime++;
+		for (int i = 0; i < particle.size(); i++ )
+		{
+			particle.at(i)->lifeTime--;
+			if(particle.at(i)->lifeTime <= 0)
+			{
+				param.pool->freeBlock(particle.at(i));
+				particle.erase(particle.begin() + i);
+				param.freeBlocks++;
+			}
+		}
+
+		if(emissionTime >= param.emissionRate && param.freeBlocks > 0)
 		{
 			particle.push_back(param.pool->getBlock());
-			particle.at(i)->lifeTime = rand() % 2000 + 1;
+			param.freeBlocks--;
 		}
-
-		float emissionTime = 0.0f;
-		param.freeBlocks = 0;
-		while(--param.runTime) 
-		{
-			emissionTime++;
-			for (int i = 0; i < particle.size(); i++ )
-			{
-				particle.at(i)->lifeTime--;
-				if(particle.at(i)->lifeTime <= 0)
-				{
-					param.pool->freeBlock(particle.at(i));
-					particle.erase(particle.begin() + i);
-					param.freeBlocks++;
-				}
-			}
-
-			if(emissionTime >= param.emissionRate && param.freeBlocks > 0)
-			{
-				particle.push_back(param.pool->getBlock());
-				param.freeBlocks--;
-			}
-		}
-	}
-	else
-	{
-		std::cout << "Thread id: " << param.id << "entering work zone" << std::endl;
-		float workperthread = HEIGHT / (NUM_THREADS); //Aslong as HEIGHT == WIDTH this will work
-		float threadStartPos = workperthread * param.id;
-		MemStack* stack = param.al_the_croc->CreateStack(56, 4, false);
-		if(CUSTOM_ALLOCATION)
-			Mandelbrot(param.stack, threadStartPos, workperthread, WIDTH, HEIGHT, param.pixmap);
-		else
-			MandelbrotNormalStack(param.stack, threadStartPos, workperthread, WIDTH, HEIGHT, param.pixmap);
-		std::cout << "Thread id: " << param.id << "LEAVING work zone" << std::endl;
-
 	}
 }
 
-
-int Application::Run()
+void StackTest(threadParam param)
 {
-	srand (time(NULL));
-	std::thread thread[NUM_THREADS];
-	unsigned int* pixmap;
-	if(!RUN_PARTICLE_TEST)
+	std::cout << "Thread id: " << param.id << "entering work zone" << std::endl;
+	float workperthread = HEIGHT / (NUM_THREADS); //Aslong as HEIGHT == WIDTH this will work
+	float threadStartPos = workperthread * param.id;
+	MemStack* stack = param.al_the_croc->CreateStack(56, 4, false);
+	if(CUSTOM_ALLOCATION)
+		Mandelbrot(param.stack, threadStartPos, workperthread, WIDTH, HEIGHT, param.pixmap);
+	else
+		MandelbrotNormalStack(param.stack, threadStartPos, workperthread, WIDTH, HEIGHT, param.pixmap);
+	std::cout << "Thread id: " << param.id << "LEAVING work zone" << std::endl;
+}
+
+
+int Application::Run(TestCases::TestCase p_testCase)
+{
+	m_Al_The_Croc = new MemoryAllocator(CUSTOM_ALLOCATION);
+	
+	if(p_testCase.functionFlag == 1)
+	{		
+		unsigned int numberOfThreads = p_testCase.nrThreads;
+
+		m_pool = m_Al_The_Croc->CreatePool<Particle>(p_testCase.pool.nrOfBlocks, p_testCase.alignment, numberOfThreads == 1 ? false : true);
+		m_pool->init();
+
+		srand (time(NULL));
+		std::thread* thread = new std::thread[numberOfThreads];
+
+		for(int i = 0; i < numberOfThreads; i++) {
+			threadParam params;
+			params.emissionRate = rand() % 10000 + 1000;
+			params.freeBlocks = 0;
+			params.runTime = p_testCase.pool.runTime;
+			params.pool = m_pool;
+			thread[i] = std::thread(PoolTest, params);
+		}
+		for(int i = 0; i < numberOfThreads; i++) {
+			thread[i].join();
+		}
+	}
+	else if(p_testCase.functionFlag == 2)
 	{
+		unsigned int numberOfThreads = p_testCase.nrThreads;
+
+		m_stack = m_Al_The_Croc->CreateStack(TOTAL_SIZE, 4, numberOfThreads == 1 ? false : true); 
+		srand (time(NULL));
+
+		std::thread* thread = new std::thread[numberOfThreads];
+
+		unsigned int* pixmap;
 		if(CUSTOM_ALLOCATION)
 			pixmap = reinterpret_cast<unsigned int*>(m_stack->Push<unsigned int[WIDTH*HEIGHT]>());
 		else
-			pixmap = (unsigned int*)malloc(TOTAL_SIZE);
+			pixmap = (unsigned int*)malloc(TOTAL_SIZE);	
 
-	}
-	for(int i = 0; i < NUM_THREADS; i++) {
-		threadParam params;
-		params.emissionRate = rand() % 10000 + 1000;
-		params.freeBlocks = 0;
-		params.runTime = 10000;
-		params.pool = m_pool;
-		params.al_the_croc = m_Al_The_Croc;
-		if(!RUN_PARTICLE_TEST) 
+		for(int i = 0; i < numberOfThreads; i++) 
 		{
+			threadParam params;
+			params.al_the_croc = m_Al_The_Croc;
 			params.stack = m_stack;
 			params.id = i;
 			params.pixmap = pixmap;
+			thread[i] = std::thread(StackTest, params);
 		}
-		thread[i] = std::thread(ThreadRun, params);
-	}
-	for(int i = 0; i < NUM_THREADS; i++) {
-		thread[i].join();
-	}
-	if(!RUN_PARTICLE_TEST)
+
+		for(int i = 0; i < NUM_THREADS; i++) {
+			thread[i].join();
+		}
 		writeTga(pixmap, WIDTH, HEIGHT, "image.tga");
+	}
+
 	return (int)StopCode::CleanStop;
 }
-
-
-
-
-
 
 void Application::writeTga(unsigned int* p_pixmap, unsigned int p_width, unsigned int p_height, char* p_name)
 {
