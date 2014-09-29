@@ -170,7 +170,7 @@ void StackTest(threadParam param)
 	float workperthread = HEIGHT / (NUM_THREADS); //Aslong as HEIGHT == WIDTH this will work
 	float threadStartPos = workperthread * param.id;
 	MemStack* stack = param.al_the_croc->CreateStack(56, 4, false);
-	if(CUSTOM_ALLOCATION)
+	if(param.customAllocation)
 		Mandelbrot(param.stack, threadStartPos, workperthread, WIDTH, HEIGHT, param.pixmap);
 	else
 		MandelbrotNormalStack(param.stack, threadStartPos, workperthread, WIDTH, HEIGHT, param.pixmap);
@@ -180,7 +180,7 @@ void StackTest(threadParam param)
 
 int Application::Run(TestCases::TestCase p_testCase)
 {
-	m_Al_The_Croc = new MemoryAllocator(CUSTOM_ALLOCATION);
+	m_Al_The_Croc = new MemoryAllocator(p_testCase.customAllocation);
 	
 	if(p_testCase.functionFlag == 1)
 	{		
@@ -214,7 +214,7 @@ int Application::Run(TestCases::TestCase p_testCase)
 		std::thread* thread = new std::thread[numberOfThreads];
 
 		unsigned int* pixmap;
-		if(CUSTOM_ALLOCATION)
+		if(p_testCase.customAllocation)
 			pixmap = reinterpret_cast<unsigned int*>(m_stack->Push<unsigned int[WIDTH*HEIGHT]>());
 		else
 			pixmap = (unsigned int*)malloc(TOTAL_SIZE);	
@@ -224,6 +224,7 @@ int Application::Run(TestCases::TestCase p_testCase)
 			threadParam params;
 			params.al_the_croc = m_Al_The_Croc;
 			params.stack = m_stack;
+			params.customAllocation = p_testCase.customAllocation;
 			params.id = i;
 			params.pixmap = pixmap;
 			thread[i] = std::thread(StackTest, params);

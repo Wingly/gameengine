@@ -54,7 +54,7 @@ public:
 			//Check end of stack
 		
 			i = i + (size_t)m_current;
-			m_current = (size_t*)i;+adjustment;
+			m_current = (size_t*)i + adjustment;
 			m_lock.clear(std::memory_order_release);
 			return returnblock; 
 	}
