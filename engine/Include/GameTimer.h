@@ -6,15 +6,16 @@
 
 class GameTimer
 {
-	public:
+public:
 	GameTimer();
-	float GetGameTime()const; // in seconds
-	float GetDeltaTime()const; // in seconds
+	double GetGameTime()const; // in seconds
+	double GetDeltaTime()const; // in seconds
 	void Reset(); // Call before message loop.
 	void Start(); // Call when unpaused.
 	void Stop(); // Call when paused.
 	void Tick(); // Call every frame.
-	private:
+
+private:
 	double mSecondsPerCount;
 	double mDeltaTime;
 	__int64 mBaseTime;

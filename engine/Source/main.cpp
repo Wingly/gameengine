@@ -15,12 +15,12 @@ void writeToFile(char* p_fileName, int p_id, float p_time)
 int main()
 {
 	Application application;
-	int stopCode = 1;	// 1 == restart
+	int stopCode = 1;	
 
 	for(unsigned int i = 0; i < MAX_TESTS; ++i)
 	//	while(stopCode == 1) 
 	{
-		float oldTime, newTime;
+		double oldTime, newTime;
 		GameTimer gameTimer = GameTimer();
 
 		gameTimer.Start();
