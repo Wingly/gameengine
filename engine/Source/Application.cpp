@@ -87,7 +87,7 @@ void MandelbrotNormalStack(MemStack* p_stack, float p_startPos, float p_threadHe
 	float xmax; 
 	float ymin; 
 	float ymax; 
-	float b,
+	float b;
 	float a;
 	float xn;
 	float yn;

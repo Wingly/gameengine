@@ -13,5 +13,5 @@ MemoryAllocator::~MemoryAllocator()
 
 MemStack* MemoryAllocator::CreateStack(unsigned int p_stacksize, unsigned int p_alignment, bool p_shared)
 {
-	return new MemStack(p_stacksize, p_alignment, p_shared, m_customer_Al_the_croc);
+	return new MemStack(p_stacksize, p_alignment, p_shared);
 }
