@@ -1,0 +1,1 @@
+#! /bin/bashcut -d " " -f4 $1 | sort -r | head -n -1 | tail -n +2 | awk '{sum+=$1};END{print sum/NR}'
