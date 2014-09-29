@@ -30,6 +30,7 @@ struct threadParam
 	int freeBlocks;
 	int runTime;
 	int id;
+	bool /* im not a pool */ customAllocation;
 	unsigned int* pixmap;
 	MemPool<Particle>* pool;
 	MemStack* stack;

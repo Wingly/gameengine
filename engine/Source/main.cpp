@@ -2,8 +2,9 @@
 #include <engine/Include/Application.h>
 #include <engine/Include/GameTimer.h>
 #include <fstream>
+#include <string>
 
-static const unsigned int MAX_TESTS = 100;
+static const unsigned int MAX_TESTS = 2000;
 
 void writeToFile(char* p_fileName, int p_id, float p_time)
 {
@@ -32,9 +33,10 @@ int main()
 		gameTimer.Tick();
 		gameTimer.Stop();
 		newTime = gameTimer.GetGameTime();
-
+	
 		newTime = newTime - oldTime;
 		//std::cout << newTime << std::endl;
+
 		writeToFile("file.test", i, newTime);
 	}
 	

@@ -34,6 +34,7 @@ struct TestCase
 	unsigned int functionFlag;
 	unsigned int nrThreads;		// If using stack, make sure this count can divide 2000 
 	unsigned int alignment;
+	bool customAllocation;
 	Stack stack;
 	Pool pool;
 };
@@ -50,6 +51,7 @@ struct TestCase
 			testCase.pool.blockSize = 44;
 			testCase.pool.nrOfBlocks = 1024;
 			testCase.pool.runTime = 14000;
+			testCase.customAllocation = true;
 		}
 		else if(index >= nrOfRunsPerTest*1 && index < nrOfRunsPerTest*2)
 		{
@@ -59,7 +61,9 @@ struct TestCase
 			testCase.pool = Pool();
 			testCase.pool.blockSize = 44;
 			testCase.pool.nrOfBlocks = 1024;
-			testCase.pool.runTime = 7000;
+			testCase.pool.runTime = 14000;
+			testCase.customAllocation = false;
+
 		}
 		else if(index >= nrOfRunsPerTest*2 && index < nrOfRunsPerTest*3)
 		{
@@ -67,9 +71,9 @@ struct TestCase
 			testCase.nrThreads = 4;
 			testCase.alignment = 4;
 			testCase.pool = Pool();
-			testCase.pool.blockSize = 44;
-			testCase.pool.nrOfBlocks = 1024;
-			testCase.pool.runTime = 7000;
+			testCase.pool.blockSize = 440;
+			testCase.pool.nrOfBlocks = 102;
+			testCase.pool.runTime = 14000;
 		}
 		return testCase;		
 	}
