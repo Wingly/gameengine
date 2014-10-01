@@ -45,7 +45,7 @@ struct TestCase
 		if(index >= nrOfRunsPerTest*0 && index < nrOfRunsPerTest*1)
 		{
 			testCase.functionFlag = 1;
-			testCase.nrThreads = 4;
+			testCase.nrThreads = 2;
 			testCase.alignment = 4;
 			testCase.pool = Pool();
 			testCase.pool.blockSize = 44;
@@ -56,7 +56,7 @@ struct TestCase
 		else if(index >= nrOfRunsPerTest*1 && index < nrOfRunsPerTest*2)
 		{
 			testCase.functionFlag = 1;
-			testCase.nrThreads = 4;
+			testCase.nrThreads = 2;
 			testCase.alignment = 4;
 			testCase.pool = Pool();
 			testCase.pool.blockSize = 44;

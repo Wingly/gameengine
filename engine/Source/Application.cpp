@@ -189,7 +189,7 @@ int Application::Run(TestCases::TestCase p_testCase)
 		m_pool = m_Al_The_Croc->CreatePool<Particle>(p_testCase.pool.nrOfBlocks, p_testCase.alignment, numberOfThreads == 1 ? false : true);
 		m_pool->init();
 
-		srand (time(NULL));
+		//srand (time(NULL));
 		std::thread* thread = new std::thread[numberOfThreads];
 
 		for(int i = 0; i < numberOfThreads; i++) {
@@ -203,6 +203,8 @@ int Application::Run(TestCases::TestCase p_testCase)
 		for(int i = 0; i < numberOfThreads; i++) {
 			thread[i].join();
 		}
+		if(p_testCase.customAllocation)
+			delete m_pool;
 	}
 	else if(p_testCase.functionFlag == 2)
 	{
@@ -235,7 +237,7 @@ int Application::Run(TestCases::TestCase p_testCase)
 		}
 		writeTga(pixmap, WIDTH, HEIGHT, "image.tga");
 	}
-
+	delete m_Al_The_Croc;
 	return (int)StopCode::CleanStop;
 }
 

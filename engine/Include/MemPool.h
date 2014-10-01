@@ -47,8 +47,8 @@ public:
 
 			m_start = reinterpret_cast<uint32_t*>(reinterpret_cast<uint32_t>(raw) + adjustment);
 
-			uint32_t* metadata = (uint32_t*)(m_start-4);
-			*metadata = adjustment;
+			char* metadata = (char*)((uint32_t)m_start-1);
+			*metadata = static_cast<char>(adjustment);
 		
 		
 			m_firstFree = m_start;
@@ -67,13 +67,19 @@ public:
 	}
 	~MemPool()
 	{
+		
+			char* test = (char*)((uint32_t)m_start-1);
+			uint32_t test2 = (uint32_t)(*test);
+			void* deleteptr = (void*)((uint32_t)m_start - test2);
+			free(deleteptr);
+		
 	}
 	
 	T* getBlock()
 	{
 		if(m_custom)
 		{
-			while(m_lock.test_and_set(std::memory_order_acquire) && m_shared)
+			while(m_shared && m_lock.test_and_set(std::memory_order_acquire) )
 			{
 				//keep on spinning in the free world!
 			}
@@ -103,7 +109,7 @@ public:
 		{
 			if(FREE_TO_LAST)
 			{
-				while(m_lock2.test_and_set(std::memory_order_acquire) && m_shared)
+				while(m_shared && m_lock2.test_and_set(std::memory_order_acquire))
 				{
 					//keep on spinning in the free world!
 				}
@@ -115,7 +121,7 @@ public:
 			}
 			else
 			{
-				while(m_lock.test_and_set(std::memory_order_acquire) && m_shared)
+				while(m_shared && m_lock.test_and_set(std::memory_order_acquire))
 				{
 					//keep on spinning in the free world!
 				}
