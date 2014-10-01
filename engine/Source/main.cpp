@@ -4,7 +4,7 @@
 #include <fstream>
 #include <string>
 
-static const unsigned int MAX_TESTS = 2000;
+static const unsigned int MAX_TESTS = 1000;
 
 void writeToFile(char* p_fileName, int p_id, float p_time)
 {
@@ -17,7 +17,10 @@ int main()
 {
 	Application application;
 	int stopCode = 1;	
-
+	double sum = 0;
+	double avg = 0;
+	double min = 1000;
+	double max = 0;
 	for(unsigned int i = 0; i < MAX_TESTS; ++i)
 	//	while(stopCode == 1) 
 	{
@@ -25,7 +28,7 @@ int main()
 		GameTimer gameTimer = GameTimer();
 
 		gameTimer.Start();
-		gameTimer.Tick();	
+		gameTimer.Tick();
 		oldTime = gameTimer.GetGameTime();
 
 		stopCode = application.Run(TestCases::GetTestCase(i));
@@ -35,11 +38,20 @@ int main()
 		newTime = gameTimer.GetGameTime();
 	
 		newTime = newTime - oldTime;
+
+		if(newTime < min)
+			min = newTime;
+		if(newTime > max)
+			max = newTime;
+
+		sum += newTime;
 		//std::cout << newTime << std::endl;
 
-		writeToFile("file.test", i, newTime);
+		writeToFile("Test_stack_4_threads.txt", i, newTime);
 	}
-	
+	sum -= (min+max);
+	avg = sum/(MAX_TESTS-2);
+	writeToFile("Test_pool_4_threads.txt", -1, avg);
 	system("pause");
 	return 0;
 }

@@ -44,6 +44,15 @@ struct TestCase
 		TestCase testCase;
 		if(index >= nrOfRunsPerTest*0 && index < nrOfRunsPerTest*1)
 		{
+			testCase.functionFlag = 2;
+			testCase.nrThreads = 4;
+			testCase.alignment = 4;
+			testCase.stack = Stack();
+			testCase.stack.stackSize = 123456789;
+			testCase.customAllocation = false;
+		}
+		else if(index >= nrOfRunsPerTest*10 && index < nrOfRunsPerTest*11) // 0, 1
+		{
 			testCase.functionFlag = 1;
 			testCase.nrThreads = 2;
 			testCase.alignment = 4;
@@ -74,7 +83,9 @@ struct TestCase
 			testCase.pool.blockSize = 440;
 			testCase.pool.nrOfBlocks = 102;
 			testCase.pool.runTime = 14000;
+			testCase.customAllocation = false;
 		}
+		
 		return testCase;		
 	}
 }
