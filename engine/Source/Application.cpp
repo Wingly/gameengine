@@ -162,17 +162,23 @@ void PoolTest(threadParam param)
 			param.freeBlocks--;
 		}
 	}
+	if(!param.Casey.sharedMemory)
+		delete param.pool;
 }
 
 void StackTest(threadParam param)
 {
 	float workperthread = HEIGHT / (NUM_THREADS); //Aslong as HEIGHT == WIDTH this will work
 	float threadStartPos = workperthread * param.id;
-	MemStack* stack = param.al_the_croc->CreateStack(56, 4, false);
-	if(param.customAllocation)
-		Mandelbrot(param.stack, threadStartPos, workperthread, WIDTH, HEIGHT, param.pixmap);
+	MemStack* stack;
+	if(!param.Casey.sharedMemory)
+		stack = param.al_the_croc->CreateStack(56, 4, false);
 	else
-		MandelbrotNormalStack(param.stack, threadStartPos, workperthread, WIDTH, HEIGHT, param.pixmap);
+		stack = param.stack;
+	if(param.customAllocation)
+		Mandelbrot(stack, threadStartPos, workperthread, WIDTH, HEIGHT, param.pixmap);
+	else
+		MandelbrotNormalStack(stack, threadStartPos, workperthread, WIDTH, HEIGHT, param.pixmap);
 }
 
 
@@ -184,8 +190,11 @@ int Application::Run(TestCases::TestCase p_testCase)
 	{		
 		unsigned int numberOfThreads = p_testCase.nrThreads;
 
-		m_pool = m_Al_The_Croc->CreatePool<Particle>(p_testCase.pool.nrOfBlocks, p_testCase.alignment, numberOfThreads == 1 ? false : true);
-		m_pool->init();
+		if(p_testCase.sharedMemory)
+		{
+			m_pool = m_Al_The_Croc->CreatePool<Particle>(p_testCase.pool.nrOfBlocks, p_testCase.alignment, p_testCase.sharedMemory);
+			m_pool->init();
+		}
 
 		//srand (time(NULL));
 		std::thread* thread = new std::thread[numberOfThreads];
@@ -195,13 +204,17 @@ int Application::Run(TestCases::TestCase p_testCase)
 			params.emissionRate = rand() % 10000 + 1000;
 			params.freeBlocks = 0;
 			params.runTime = p_testCase.pool.runTime;
-			params.pool = m_pool;
+			if(p_testCase.sharedMemory)
+				params.pool = m_pool;
+			else
+				params.pool = m_Al_The_Croc->CreatePool<Particle>(p_testCase.pool.nrOfBlocks / p_testCase.nrThreads, p_testCase.alignment, p_testCase.sharedMemory);;
 			thread[i] = std::thread(PoolTest, params);
+			params.Casey = p_testCase;
 		}
 		for(int i = 0; i < numberOfThreads; i++) {
 			thread[i].join();
 		}
-		if(p_testCase.customAllocation)
+		if(p_testCase.customAllocation && p_testCase.sharedMemory)
 			delete m_pool;
 	}
 	else if(p_testCase.functionFlag == 2)

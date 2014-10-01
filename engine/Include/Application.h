@@ -35,6 +35,7 @@ struct threadParam
 	MemPool<Particle>* pool;
 	MemStack* stack;
 	MemoryAllocator* al_the_croc;
+	TestCases::TestCase Casey;
 };
 
 // Forward declaratiuon

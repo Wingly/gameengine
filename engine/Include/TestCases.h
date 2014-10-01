@@ -35,8 +35,10 @@ struct TestCase
 	unsigned int nrThreads;		// If using stack, make sure this count can divide 2000 
 	unsigned int alignment;
 	bool customAllocation;
+	bool sharedMemory;
 	Stack stack;
 	Pool pool;
+	char* m_fileName;
 };
 
 	inline TestCase GetTestCase(unsigned int index)
@@ -50,31 +52,59 @@ struct TestCase
 			testCase.stack = Stack();
 			testCase.stack.stackSize = 123456789;
 			testCase.customAllocation = false;
-		}
-		else if(index >= nrOfRunsPerTest*10 && index < nrOfRunsPerTest*11) // 0, 1
-		{
-			testCase.functionFlag = 1;
-			testCase.nrThreads = 2;
-			testCase.alignment = 4;
-			testCase.pool = Pool();
-			testCase.pool.blockSize = 44;
-			testCase.pool.nrOfBlocks = 1024;
-			testCase.pool.runTime = 14000;
-			testCase.customAllocation = true;
+			testCase.sharedMemory = true;
+			testCase.m_fileName = "Stack_noncustom_shared";
 		}
 		else if(index >= nrOfRunsPerTest*1 && index < nrOfRunsPerTest*2)
 		{
+			testCase.functionFlag = 2;
+			testCase.nrThreads = 4;
+			testCase.alignment = 4;
+			testCase.stack = Stack();
+			testCase.stack.stackSize = 123456789;
+			testCase.customAllocation = true;
+			testCase.sharedMemory = true;
+			testCase.m_fileName = "Stack_custom_shared";
+		}
+		else if(index >= nrOfRunsPerTest*2 && index < nrOfRunsPerTest*3)
+		{
+			testCase.functionFlag = 2;
+			testCase.nrThreads = 4;
+			testCase.alignment = 4;
+			testCase.stack = Stack();
+			testCase.stack.stackSize = 123456789;
+			testCase.customAllocation = true;
+			testCase.sharedMemory = false;
+			testCase.m_fileName = "Stack_custom_nonshared";
+		}
+		else if(index >= nrOfRunsPerTest*3 && index < nrOfRunsPerTest*4) // 0, 1
+		{
 			testCase.functionFlag = 1;
-			testCase.nrThreads = 2;
+			testCase.nrThreads = 4;
 			testCase.alignment = 4;
 			testCase.pool = Pool();
 			testCase.pool.blockSize = 44;
 			testCase.pool.nrOfBlocks = 1024;
 			testCase.pool.runTime = 14000;
 			testCase.customAllocation = false;
+			testCase.sharedMemory = true;
+			testCase.m_fileName = "Pool_noncustom_shared";
+		}
+		else if(index >= nrOfRunsPerTest*4 && index < nrOfRunsPerTest*5)
+		{
+			testCase.functionFlag = 1;
+			testCase.nrThreads = 4;
+			testCase.alignment = 4;
+			testCase.pool = Pool();
+			testCase.pool.blockSize = 44;
+			testCase.pool.nrOfBlocks = 1024;
+			testCase.pool.runTime = 14000;
+			testCase.customAllocation = true;
+			testCase.sharedMemory = true;
+			testCase.m_fileName = "Pool_custom_shared";
 
 		}
-		else if(index >= nrOfRunsPerTest*2 && index < nrOfRunsPerTest*3)
+		else if(index >= nrOfRunsPerTest*5 && index < nrOfRunsPerTest*6)
 		{
 			testCase.functionFlag = 1;
 			testCase.nrThreads = 4;
@@ -83,7 +113,9 @@ struct TestCase
 			testCase.pool.blockSize = 440;
 			testCase.pool.nrOfBlocks = 102;
 			testCase.pool.runTime = 14000;
-			testCase.customAllocation = false;
+			testCase.customAllocation = true;
+			testCase.sharedMemory = false;
+			testCase.m_fileName = "Pool_custom_nonshared";
 		}
 		
 		return testCase;		

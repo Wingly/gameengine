@@ -4,7 +4,7 @@
 #include <fstream>
 #include <string>
 
-static const unsigned int MAX_TESTS = 1000;
+static const unsigned int MAX_TESTS = 6000;
 
 void writeToFile(char* p_fileName, int p_id, float p_time)
 {
@@ -27,14 +27,16 @@ int main()
 		double oldTime, newTime;
 		GameTimer gameTimer = GameTimer();
 
+		TestCases::TestCase CaseyAleine = TestCases::GetTestCase(i);
 		gameTimer.Start();
 		gameTimer.Tick();
 		oldTime = gameTimer.GetGameTime();
 
-		stopCode = application.Run(TestCases::GetTestCase(i));
+		stopCode = application.Run(CaseyAleine);
 
 		gameTimer.Tick();
 		gameTimer.Stop();
+
 		newTime = gameTimer.GetGameTime();
 	
 		newTime = newTime - oldTime;
@@ -45,13 +47,22 @@ int main()
 			max = newTime;
 
 		sum += newTime;
-		//std::cout << newTime << std::endl;
+		if(i % 100 == 0)
+			std::cout << "Iteration i= " << i << std::endl;
 
-		writeToFile("Test_stack_4_threads.txt", i, newTime);
+		writeToFile(CaseyAleine.m_fileName, i, newTime);
+		if(i % TestCases::nrOfRunsPerTest == 0 && i != 0)
+	//	if(i % 10 == 0 && i != 0)
+		{
+				sum -= (min+max);
+				avg = sum/(TestCases::nrOfRunsPerTest-2);
+			//	avg = sum/(MAX_TESTS-2);
+				writeToFile(CaseyAleine.m_fileName, -1, sum);
+				writeToFile(CaseyAleine.m_fileName, -2, avg);
+				sum = 0;
+		}
 	}
-	sum -= (min+max);
-	avg = sum/(MAX_TESTS-2);
-	writeToFile("Test_pool_4_threads.txt", -1, avg);
+
 	system("pause");
 	return 0;
 }
