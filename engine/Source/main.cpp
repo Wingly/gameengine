@@ -4,6 +4,10 @@
 #include <fstream>
 #include <string>
 
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+
 static const unsigned int MAX_TESTS = 6000;
 
 void writeToFile(char* p_fileName, int p_id, float p_time)
@@ -21,7 +25,7 @@ int main()
 	double avg = 0;
 	double min = 1000;
 	double max = 0;
-	for(unsigned int i = 0; i < MAX_TESTS; ++i)
+	for(unsigned int i = 999; i < MAX_TESTS; ++i)
 	//	while(stopCode == 1) 
 	{
 		double oldTime, newTime;
@@ -47,8 +51,13 @@ int main()
 			max = newTime;
 
 		sum += newTime;
+
+		//_CrtDumpMemoryLeaks();
+
 		if(i % 100 == 0)
+		{
 			std::cout << "Iteration i= " << i << std::endl;
+		}
 
 		writeToFile(CaseyAleine.m_fileName, i, newTime);
 		if(i % TestCases::nrOfRunsPerTest == 0 && i != 0)

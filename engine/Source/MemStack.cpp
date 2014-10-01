@@ -19,6 +19,7 @@ MemStack::~MemStack()
 {
 	//delete all
 
+	//free(m_start);
 }
 
 void MemStack::Wipe()

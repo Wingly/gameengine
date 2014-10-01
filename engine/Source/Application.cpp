@@ -170,7 +170,7 @@ void StackTest(threadParam param)
 {
 	float workperthread = HEIGHT / (NUM_THREADS); //Aslong as HEIGHT == WIDTH this will work
 	float threadStartPos = workperthread * param.id;
-	MemStack* stack;
+	MemStack* stack = nullptr;
 	if(!param.Casey.sharedMemory)
 		stack = param.al_the_croc->CreateStack(56, 4, false);
 	else
@@ -179,6 +179,9 @@ void StackTest(threadParam param)
 		Mandelbrot(stack, threadStartPos, workperthread, WIDTH, HEIGHT, param.pixmap);
 	else
 		MandelbrotNormalStack(stack, threadStartPos, workperthread, WIDTH, HEIGHT, param.pixmap);
+	
+	if(!param.Casey.sharedMemory)
+		delete stack;
 }
 
 
@@ -230,8 +233,9 @@ int Application::Run(TestCases::TestCase p_testCase)
 		if(p_testCase.customAllocation)
 			pixmap = reinterpret_cast<unsigned int*>(m_stack->Push<unsigned int[WIDTH*HEIGHT]>());
 		else
-			pixmap = (unsigned int*)malloc(TOTAL_SIZE);	
+			pixmap = new unsigned int[TOTAL_SIZE];//(unsigned int*)malloc(TOTAL_SIZE);	
 
+		
 		for(int i = 0; i < numberOfThreads; i++) 
 		{
 			threadParam params;
@@ -247,6 +251,15 @@ int Application::Run(TestCases::TestCase p_testCase)
 			thread[i].join();
 		}
 		//writeTga(pixmap, WIDTH, HEIGHT, "image.tga");
+		if(p_testCase.customAllocation && p_testCase.sharedMemory)
+			delete m_stack;
+		else
+		{
+			delete[] pixmap;
+			if(p_testCase.sharedMemory)
+				delete m_stack;
+			
+		}
 	}
 	delete m_Al_The_Croc;
 	return (int)StopCode::CleanStop;
