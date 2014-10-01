@@ -166,7 +166,6 @@ void PoolTest(threadParam param)
 
 void StackTest(threadParam param)
 {
-	std::cout << "Thread id: " << param.id << "entering work zone" << std::endl;
 	float workperthread = HEIGHT / (NUM_THREADS); //Aslong as HEIGHT == WIDTH this will work
 	float threadStartPos = workperthread * param.id;
 	MemStack* stack = param.al_the_croc->CreateStack(56, 4, false);
@@ -174,7 +173,6 @@ void StackTest(threadParam param)
 		Mandelbrot(param.stack, threadStartPos, workperthread, WIDTH, HEIGHT, param.pixmap);
 	else
 		MandelbrotNormalStack(param.stack, threadStartPos, workperthread, WIDTH, HEIGHT, param.pixmap);
-	std::cout << "Thread id: " << param.id << "LEAVING work zone" << std::endl;
 }
 
 
@@ -233,7 +231,7 @@ int Application::Run(TestCases::TestCase p_testCase)
 		for(int i = 0; i < NUM_THREADS; i++) {
 			thread[i].join();
 		}
-		writeTga(pixmap, WIDTH, HEIGHT, "image.tga");
+		//writeTga(pixmap, WIDTH, HEIGHT, "image.tga");
 	}
 
 	return (int)StopCode::CleanStop;
