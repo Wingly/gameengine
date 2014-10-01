@@ -25,7 +25,7 @@ int main()
 	double avg = 0;
 	double min = 1000;
 	double max = 0;
-	for(unsigned int i = 999; i < MAX_TESTS; ++i)
+	for(unsigned int i = 0; i < MAX_TESTS; ++i)
 	//	while(stopCode == 1) 
 	{
 		double oldTime, newTime;
