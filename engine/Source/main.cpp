@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <crtdbg.h>
 
-static const unsigned int MAX_TESTS = 6000;
+static const unsigned int MAX_TESTS = 9000;
 
 void writeToFile(char* p_fileName, int p_id, float p_time)
 {
@@ -60,7 +60,7 @@ int main()
 		}
 
 		writeToFile(CaseyAleine.m_fileName, i, newTime);
-		if(i % TestCases::nrOfRunsPerTest == 0 && i != 0)
+		if((i + 1) % TestCases::nrOfRunsPerTest == 0 && i != 0)
 	//	if(i % 10 == 0 && i != 0)
 		{
 				sum -= (min+max);
@@ -69,6 +69,8 @@ int main()
 				writeToFile(CaseyAleine.m_fileName, -1, sum);
 				writeToFile(CaseyAleine.m_fileName, -2, avg);
 				sum = 0;
+				min = 1000;
+				max = 0;
 		}
 	}
 

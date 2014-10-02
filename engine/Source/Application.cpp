@@ -5,6 +5,7 @@
 #include <complex>
 #include <stdio.h>
 #include <vector>
+#include <Windows.h>
 
 #define WIDTH 2000
 #define HEIGHT 2000
@@ -130,14 +131,21 @@ void MandelbrotNormalStack(MemStack* p_stack, float p_startPos, float p_threadHe
 	}
 }
 
+
 void PoolTest(threadParam param)
 {
 	std::vector<Particle*> particle;
-		
-	for(int i = 0; i < NUM_PARTICLES_PER_THREAD; i++) 
+	
+	int numParticlesPerThread = param.Casey.pool.nrOfBlocks / param.Casey.nrThreads;
+
+	for(int i = 0; i < numParticlesPerThread; i++) 
 	{
-		particle.push_back(param.pool->getBlock());
-		particle.at(i)->lifeTime = rand() % 2000 + 1;
+		Particle* part = param.pool->getBlock();
+		if(part != nullptr)
+		{
+			part->lifeTime = rand() % 2000 + 1;
+			particle.push_back(part);
+		}
 	}
 
 	float emissionTime = 0.0f;
@@ -158,8 +166,13 @@ void PoolTest(threadParam param)
 
 		if(emissionTime >= param.emissionRate && param.freeBlocks > 0)
 		{
-			particle.push_back(param.pool->getBlock());
-			param.freeBlocks--;
+			Particle* part = param.pool->getBlock();
+			if(part != nullptr)
+			{
+				part->lifeTime = rand() % 2000 + 1;
+				particle.push_back(part);
+				param.freeBlocks--;
+			}
 		}
 	}
 	if(!param.Casey.sharedMemory)
@@ -171,14 +184,29 @@ void StackTest(threadParam param)
 	float workperthread = HEIGHT / (NUM_THREADS); //Aslong as HEIGHT == WIDTH this will work
 	float threadStartPos = workperthread * param.id;
 	MemStack* stack = nullptr;
-	if(!param.Casey.sharedMemory)
-		stack = param.al_the_croc->CreateStack(56, 4, false);
-	else
-		stack = param.stack;
-	if(param.customAllocation)
-		Mandelbrot(stack, threadStartPos, workperthread, WIDTH, HEIGHT, param.pixmap);
-	else
-		MandelbrotNormalStack(stack, threadStartPos, workperthread, WIDTH, HEIGHT, param.pixmap);
+	stack = param.al_the_croc->CreateStack(param.Casey.stack.stackSize, 4, false, param.Casey.customAllocation);
+
+	std::vector<float*> testVector;
+	while(--param.Casey.runTime)
+	{
+		while(true)
+		{
+			float* testVar = stack->Push<float>();
+			if(testVar != nullptr)
+				testVector.push_back(testVar);
+			else
+				break;
+
+		}
+
+		stack->Wipe();
+		if(!param.Casey.customAllocation)
+			for(auto x : testVector)
+			{
+				delete x;
+			}
+		testVector.clear();
+	}
 	
 	if(!param.Casey.sharedMemory)
 		delete stack;
@@ -206,13 +234,16 @@ int Application::Run(TestCases::TestCase p_testCase)
 			threadParam params;
 			params.emissionRate = rand() % 10000 + 1000;
 			params.freeBlocks = 0;
-			params.runTime = p_testCase.pool.runTime;
+			params.runTime = p_testCase.runTime;
 			if(p_testCase.sharedMemory)
 				params.pool = m_pool;
 			else
-				params.pool = m_Al_The_Croc->CreatePool<Particle>(p_testCase.pool.nrOfBlocks / p_testCase.nrThreads, p_testCase.alignment, p_testCase.sharedMemory);;
-			thread[i] = std::thread(PoolTest, params);
+			{
+				params.pool = m_Al_The_Croc->CreatePool<Particle>(p_testCase.pool.nrOfBlocks / p_testCase.nrThreads, p_testCase.alignment, p_testCase.sharedMemory);
+				params.pool->init();
+			}
 			params.Casey = p_testCase;
+			thread[i] = std::thread(PoolTest, params);
 		}
 		for(int i = 0; i < numberOfThreads; i++) {
 			thread[i].join();
@@ -224,26 +255,25 @@ int Application::Run(TestCases::TestCase p_testCase)
 	{
 		unsigned int numberOfThreads = p_testCase.nrThreads;
 
-		m_stack = m_Al_The_Croc->CreateStack(TOTAL_SIZE, 4, numberOfThreads == 1 ? false : true); 
 		srand (time(NULL));
 
 		std::thread* thread = new std::thread[numberOfThreads];
 
 		unsigned int* pixmap;
-		if(p_testCase.customAllocation)
-			pixmap = reinterpret_cast<unsigned int*>(m_stack->Push<unsigned int[WIDTH*HEIGHT]>());
-		else
-			pixmap = new unsigned int[TOTAL_SIZE];//(unsigned int*)malloc(TOTAL_SIZE);	
+		//if(p_testCase.customAllocation)
+		//	pixmap = reinterpret_cast<unsigned int*>(m_stack->Push<unsigned int[WIDTH*HEIGHT]>());
+		//else
+		//	pixmap = new unsigned int[TOTAL_SIZE];//(unsigned int*)malloc(TOTAL_SIZE);	
 
 		
 		for(int i = 0; i < numberOfThreads; i++) 
 		{
 			threadParam params;
 			params.al_the_croc = m_Al_The_Croc;
-			params.stack = m_stack;
-			params.customAllocation = p_testCase.customAllocation;
 			params.id = i;
-			params.pixmap = pixmap;
+			params.runTime = p_testCase.runTime;
+			params.Casey = p_testCase;
+			//params.pixmap = pixmap;
 			thread[i] = std::thread(StackTest, params);
 		}
 
@@ -251,15 +281,7 @@ int Application::Run(TestCases::TestCase p_testCase)
 			thread[i].join();
 		}
 		//writeTga(pixmap, WIDTH, HEIGHT, "image.tga");
-		if(p_testCase.customAllocation && p_testCase.sharedMemory)
-			delete m_stack;
-		else
-		{
-			delete[] pixmap;
-			if(p_testCase.sharedMemory)
-				delete m_stack;
-			
-		}
+		delete[] thread;
 	}
 	delete m_Al_The_Croc;
 	return (int)StopCode::CleanStop;

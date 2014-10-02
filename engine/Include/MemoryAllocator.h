@@ -17,7 +17,7 @@ public:
 	}
 
 	//Note: If you allocate more than some unknown high value, think INT_MAX~ish, you're gonna have a bad bad time
-	MemStack* CreateStack(unsigned int p_stacksize, unsigned int p_alignment, bool p_shared);
+	MemStack* CreateStack(unsigned int p_stacksize, unsigned int p_alignment, bool p_shared, bool p_custom);
 
 private:
 	bool m_customer_Al_the_croc;

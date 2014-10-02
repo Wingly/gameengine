@@ -85,10 +85,8 @@ public:
 			}
 			if(m_firstFree == nullptr || m_last == m_firstFree)
 			{
-				std::cout << "POOL OUT OF MEMORY!!!!" << std::endl << " I have no clue how to tell you which pool it is, but i'm sure you'll be able to figure it out" 
-						<< std::endl << "Also, you should really make some better sort of errorhandling for this";
-				system("pause");
-				//Inget ledigt minne!
+				m_lock.clear();
+				return nullptr;
 			}
 				
 			T* local = (T*)m_firstFree;
