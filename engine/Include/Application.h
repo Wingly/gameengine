@@ -23,6 +23,12 @@ struct Particle {
 	float3 start;
 	float3 dir;
 	float3 colR;
+	float data;
+	float data2;
+	float data3;
+
+	int extradata;
+	int moredata;
 };
 struct threadParam
 {

@@ -33,103 +33,103 @@ Application::~Application()
 	
 }
 
-void Mandelbrot(MemStack* p_stack, float p_startPos, float p_threadHeight, float p_width, float p_height, unsigned int* p_pixMap)
-{
-	
-	int* i = p_stack->Push<int>();
-	int* j = p_stack->Push<int>();
-	float* xmin = p_stack->Push<float>();
-	float* xmax = p_stack->Push<float>();
-	float* ymin = p_stack->Push<float>();
-	float* ymax = p_stack->Push<float>();
-	float* b = p_stack->Push<float>();
-	float* a = p_stack->Push<float>();
-	float* xn = p_stack->Push<float>();
-	float* yn = p_stack->Push<float>();
-	int* ii = p_stack->Push<int>();
-	float* sx = p_stack->Push<float>();
-	float* sy = p_stack->Push<float>();
-	int* c = p_stack->Push<int>();
-	*xmin = -1.6f;
-	*xmax = 1.6f;
-	*ymin = -1.6f;
-	*ymax = 1.6f;
-	for (*i = (int)p_startPos; *i < ((int)p_startPos+p_threadHeight); *i += 1) {
-		for (*j = 0; *j < p_width; *j += 1) {
-			*b = *xmin + *j * (*xmax - *xmin) / p_width;
-			*a = *ymin + *i * (*ymax - *ymin) / p_height;
-			*sx = 0.0f;
-			*sy = 0.0f;
-			*ii = 0;
-			while (*sx + *sy <= 64.0f) {
-				*xn = (*sx) * (*sx) - (*sy) * (*sy) + (*b);
-				*yn = 2 * (*sx) * (*sy) + (*a);
-				*sx = (*xn);
-				*sy = (*yn);
-				*ii+=1; //Apparently ++ has precedence over a de-reference, The more you know™
-				if (*ii == 1500)	{
-					break;
-				}
-			}
-			if (*ii == 1500)	{
-				p_pixMap[*j+*i*(int)p_width] = 0;
-			}
-			else {
-				*c = (int)((*ii / 32.0f) * 256.0f);
-				p_pixMap[*j + *i *(int)p_width] = *c%256;
-			}
-		}
-	}
-}
-
-void MandelbrotNormalStack(MemStack* p_stack, float p_startPos, float p_threadHeight, float p_width, float p_height, unsigned int* p_pixMap)
-{
-	
-	int i;
-	int j;
-	float xmin; 
-	float xmax; 
-	float ymin; 
-	float ymax; 
-	float b;
-	float a;
-	float xn;
-	float yn;
-	int ii;
-	float sx;
-	float sy;
-	int c;
-	xmin = -1.6f;
-	xmax = 1.6f;
-	ymin = -1.6f;
-	ymax = 1.6f;
-	for (i = (int)p_startPos; i < ((int)p_startPos+p_threadHeight); i ++) {
-		for (j = 0; j < p_width; j ++) {
-			b = xmin + j * (xmax - xmin) / p_width;
-			a = ymin + i * (ymax - ymin) / p_height;
-			sx = 0.0f;
-			sy = 0.0f;
-			ii = 0;
-			while (sx + sy <= 64.0f) {
-				xn = (sx) * (sx) - (sy) * (sy) + (b);
-				yn = 2 * (sx) * (sy) + (a);
-				sx = (xn);
-				sy = (yn);
-				ii++; //Apparently ++ has precedence over a de-reference, The more you know™
-				if (ii == 1500)	{
-					break;
-				}
-			}
-			if (ii == 1500)	{
-				p_pixMap[j+ i*(int)p_width] = 0;
-			}
-			else {
-				c = (int)((ii / 32.0f) * 256.0f);
-				p_pixMap[j + i *(int)p_width] = c%256;
-			}
-		}
-	}
-}
+//void Mandelbrot(MemStack* p_stack, float p_startPos, float p_threadHeight, float p_width, float p_height, unsigned int* p_pixMap)
+//{
+//	
+//	int* i = p_stack->Push<int>();
+//	int* j = p_stack->Push<int>();
+//	float* xmin = p_stack->Push<float>();
+//	float* xmax = p_stack->Push<float>();
+//	float* ymin = p_stack->Push<float>();
+//	float* ymax = p_stack->Push<float>();
+//	float* b = p_stack->Push<float>();
+//	float* a = p_stack->Push<float>();
+//	float* xn = p_stack->Push<float>();
+//	float* yn = p_stack->Push<float>();
+//	int* ii = p_stack->Push<int>();
+//	float* sx = p_stack->Push<float>();
+//	float* sy = p_stack->Push<float>();
+//	int* c = p_stack->Push<int>();
+//	*xmin = -1.6f;
+//	*xmax = 1.6f;
+//	*ymin = -1.6f;
+//	*ymax = 1.6f;
+//	for (*i = (int)p_startPos; *i < ((int)p_startPos+p_threadHeight); *i += 1) {
+//		for (*j = 0; *j < p_width; *j += 1) {
+//			*b = *xmin + *j * (*xmax - *xmin) / p_width;
+//			*a = *ymin + *i * (*ymax - *ymin) / p_height;
+//			*sx = 0.0f;
+//			*sy = 0.0f;
+//			*ii = 0;
+//			while (*sx + *sy <= 64.0f) {
+//				*xn = (*sx) * (*sx) - (*sy) * (*sy) + (*b);
+//				*yn = 2 * (*sx) * (*sy) + (*a);
+//				*sx = (*xn);
+//				*sy = (*yn);
+//				*ii+=1; //Apparently ++ has precedence over a de-reference, The more you know™
+//				if (*ii == 1500)	{
+//					break;
+//				}
+//			}
+//			if (*ii == 1500)	{
+//				p_pixMap[*j+*i*(int)p_width] = 0;
+//			}
+//			else {
+//				*c = (int)((*ii / 32.0f) * 256.0f);
+//				p_pixMap[*j + *i *(int)p_width] = *c%256;
+//			}
+//		}
+//	}
+//}
+//
+//void MandelbrotNormalStack(MemStack* p_stack, float p_startPos, float p_threadHeight, float p_width, float p_height, unsigned int* p_pixMap)
+//{
+//	
+//	int i;
+//	int j;
+//	float xmin; 
+//	float xmax; 
+//	float ymin; 
+//	float ymax; 
+//	float b;
+//	float a;
+//	float xn;
+//	float yn;
+//	int ii;
+//	float sx;
+//	float sy;
+//	int c;
+//	xmin = -1.6f;
+//	xmax = 1.6f;
+//	ymin = -1.6f;
+//	ymax = 1.6f;
+//	for (i = (int)p_startPos; i < ((int)p_startPos+p_threadHeight); i ++) {
+//		for (j = 0; j < p_width; j ++) {
+//			b = xmin + j * (xmax - xmin) / p_width;
+//			a = ymin + i * (ymax - ymin) / p_height;
+//			sx = 0.0f;
+//			sy = 0.0f;
+//			ii = 0;
+//			while (sx + sy <= 64.0f) {
+//				xn = (sx) * (sx) - (sy) * (sy) + (b);
+//				yn = 2 * (sx) * (sy) + (a);
+//				sx = (xn);
+//				sy = (yn);
+//				ii++; //Apparently ++ has precedence over a de-reference, The more you know™
+//				if (ii == 1500)	{
+//					break;
+//				}
+//			}
+//			if (ii == 1500)	{
+//				p_pixMap[j+ i*(int)p_width] = 0;
+//			}
+//			else {
+//				c = (int)((ii / 32.0f) * 256.0f);
+//				p_pixMap[j + i *(int)p_width] = c%256;
+//			}
+//		}
+//	}
+//}
 
 
 void PoolTest(threadParam param)
@@ -186,12 +186,12 @@ void StackTest(threadParam param)
 	MemStack* stack = nullptr;
 	stack = param.al_the_croc->CreateStack(param.Casey.stack.stackSize, 4, false, param.Casey.customAllocation);
 
-	std::vector<float*> testVector;
+	std::vector<char*> testVector;
 	while(--param.Casey.runTime)
 	{
 		while(true)
 		{
-			float* testVar = stack->Push<float>();
+			char* testVar = stack->Push<char>(1);
 			if(testVar != nullptr)
 				testVector.push_back(testVar);
 			else

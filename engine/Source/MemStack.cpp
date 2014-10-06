@@ -8,7 +8,7 @@ MemStack::MemStack(unsigned p_stacksize, unsigned p_alignment, bool p_shared, bo
 	if(p_custom)
 		m_start = (size_t*)malloc(p_stacksize);
 	m_current = m_start;
-	m_alignment = p_custom ? p_alignment : 0;
+	m_nonCustomMemFinder = 0;
 	m_lock.clear();
 	m_shared = p_shared;
 	m_custom = p_custom;
@@ -31,7 +31,7 @@ void MemStack::Wipe()
 				//Keep on spinning in the free world
 			}
 	if(!m_custom)
-		m_alignment = 0;
+		m_nonCustomMemFinder = 0;
 	m_lock.clear();
 	m_current = m_start;
 }

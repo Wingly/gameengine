@@ -21,7 +21,7 @@ private:
 	size_t m_size;
 	size_t* m_current;
 	//Marker m_currentMarker;
-	size_t m_alignment;
+	unsigned m_nonCustomMemFinder;
 	//std::atomic_flag m_lock =  ATOMIC_FLAG_INIT;
 	std::atomic_flag m_lock;
 	
@@ -35,7 +35,7 @@ public:
 	void Wipe();
 
 	template <class T>
-	T* Push()
+	T* Push(unsigned p_alignment)
 	{
 		if(m_custom)
 		{
@@ -44,9 +44,9 @@ public:
 				//Keep on spinning in the free world
 			}
 			
-			size_t mask = m_alignment - 1;
+			size_t mask = p_alignment - 1;
 			size_t misalignment = ((size_t)m_current & mask);
-			size_t adjustment = m_alignment - misalignment;
+			size_t adjustment = p_alignment - misalignment;
 
 			
 			if(((size_t)m_current + (size_t)adjustment + sizeof(T)) >= ((size_t)m_start + (size_t)m_size))
@@ -70,8 +70,8 @@ public:
 		}
 		else
 		{
-			m_alignment+= sizeof(T);
-			if(m_alignment < m_size)
+			m_nonCustomMemFinder+= sizeof(T);
+			if(m_nonCustomMemFinder < m_size)
 				return new T();
 			else
 				return nullptr;

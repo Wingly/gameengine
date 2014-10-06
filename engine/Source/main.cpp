@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <crtdbg.h>
 
-static const unsigned int MAX_TESTS = 9000;
+static const unsigned int MAX_TESTS = 4000;
 
 void writeToFile(char* p_fileName, int p_id, float p_time)
 {
