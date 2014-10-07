@@ -2,19 +2,12 @@
 
 #include <stdint.h>
 #include <atomic>
-/*
-struct Marker
-{
-	uint32_t* mark;
-	int id;
-};*/
-
 #include <iostream>
 namespace
 {
 	std::atomic_flag flag = ATOMIC_FLAG_INIT;
 }
-class MemStack
+class SingleFrameStack
 {
 private:
 	size_t* m_start;
@@ -28,9 +21,9 @@ private:
 	bool m_shared;
 	bool m_custom;
 public:	
-	MemStack(unsigned int p_stacksize, unsigned p_alignment, bool p_shared, bool p_custom);
+	SingleFrameStack(unsigned int p_stacksize, bool p_shared, bool p_custom);
 
-	~MemStack();
+	~SingleFrameStack();
 
 	void Wipe();
 

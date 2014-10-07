@@ -1,8 +1,8 @@
-#include "engine\Include\MemStack.h"
+#include "engine\Include\SingleFrameStack.h"
 #include <stdlib.h>
 
 
-MemStack::MemStack(unsigned p_stacksize, unsigned p_alignment, bool p_shared, bool p_custom)
+SingleFrameStack::SingleFrameStack(unsigned p_stacksize, bool p_shared, bool p_custom)
 {
 	m_size = p_stacksize;
 	if(p_custom)
@@ -17,14 +17,14 @@ MemStack::MemStack(unsigned p_stacksize, unsigned p_alignment, bool p_shared, bo
 }
 
 
-MemStack::~MemStack()
+SingleFrameStack::~SingleFrameStack()
 {
 	//delete all
 	if(m_custom)
 		free(m_start);
 }
 
-void MemStack::Wipe()
+void SingleFrameStack::Wipe()
 {
 	while( m_shared && m_lock.test_and_set(std::memory_order_acquire))
 			{
