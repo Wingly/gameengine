@@ -23,12 +23,14 @@ struct Particle {
 	float3 start;
 	float3 dir;
 	float3 colR;
-	float data;
+
+	//Added to simulate bigger blocks in the pool
+	/*float data;
 	float data2;
 	float data3;
 
 	int extradata;
-	int moredata;
+	int moredata;*/
 };
 struct threadParam
 {
@@ -65,7 +67,6 @@ private:
 	MemPool<Particle>* m_pool;
 	MemStack* m_stack;
 	MemoryAllocator* m_Al_The_Croc;
-	//void Mandelbrot(float p_startPos,  float p_threadHeight, float p_width, float p_height, unsigned int* p_pixMap );
 	void writeTga(unsigned int* p_pixmap, unsigned int p_width, unsigned int p_height, char* p_name);
 	bool m_running;
 

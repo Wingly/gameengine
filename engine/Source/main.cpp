@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <crtdbg.h>
 
-static const unsigned int MAX_TESTS = 4000;
+static const unsigned int MAX_TESTS = 9000;
 
 void writeToFile(char* p_fileName, int p_id, float p_time)
 {
@@ -25,7 +25,9 @@ int main()
 	double avg = 0;
 	double min = 1000;
 	double max = 0;
-	for(unsigned int i = 0; i < MAX_TESTS; ++i)
+	//Each test is a set of 1000, to only run certain tests change i to a higher value
+	//or lower the MAX_TESTS variable
+	for(unsigned int i = 0; i < MAX_TESTS; ++i) 
 	//	while(stopCode == 1) 
 	{
 		double oldTime, newTime;

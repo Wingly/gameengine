@@ -1,8 +1,7 @@
 #include <engine/Include/MemoryAllocator.h>
 
-MemoryAllocator::MemoryAllocator(bool p_customer_Al_the_croc)
+MemoryAllocator::MemoryAllocator()
 {
-	m_customer_Al_the_croc = p_customer_Al_the_croc;
 }
 
 MemoryAllocator::~MemoryAllocator()
